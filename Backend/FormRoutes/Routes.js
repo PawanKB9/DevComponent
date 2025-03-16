@@ -3,21 +3,63 @@ import { users , posts } from '../DataBase/Schema.js';
 
 const app = express();
 
+//find posts using filter
+app.get('/:filter?', async (req, res) => {
+    try {
+        const filter = req.params.filter || "all";
+        let pipeline = [];
+        if (filter === 'all') {
+            pipeline = [
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+            ];
+        } else {
+            pipeline = [
+                { $match: { title: filter } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+            ];
+        }
+        const result = await posts.aggregate(pipeline);
+        res.status(200).send(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+    }
+});
 
-// Note: i have used id , userId , userName but all are same we will change it later
-
-app.get('/:filter?' , async (req , res) => {
-    const filter = req.params.filter || "all";
-    // agreegate the data : 1. on basus of most liked , "2. most viewed (not possible in our case)"
-    // send the filtered data as res
-}) 
-
+// to get all liked of any user by userName
 app.get('/liked' , async (req ,res) => {
     try {
-        const { _id } = req.body;
+        const { userName } = req.body;
+        if (!userName) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
         const result = await users.aggregate([
             {
-                $match: {_id: _id }
+                $match: { _id: userName }
             },
             {
                 $unwind: "$likes"
@@ -39,7 +81,7 @@ app.get('/liked' , async (req ,res) => {
                     postId: "$postDetails._id",
                     description: "$postDetails.description",
                     title: "$postDetails.title",
-                    userId: "$postDetails.user",
+                    userName: "$postDetails.user",
                     codeType: "$postDetails.codeType",
                     html: { $ifNull: ["$postDetails.html", ""] },
                     css: { $ifNull: ["$postDetails.css", ""] },
@@ -63,12 +105,16 @@ app.get('/liked' , async (req ,res) => {
    
 })
 
-app.get('/disliked' , async (req ,res) => {
+// to get all disLiked of any user by userName
+app.get('/disliked', async (req, res) => {
     try {
-        const { _id } = req.body;
+        const { userName } = req.body;
+        if (!userName) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
         const result = await users.aggregate([
             {
-                $match: {_id: _id }
+                $match: { _id: userName }
             },
             {
                 $unwind: "$disLikes"
@@ -90,36 +136,32 @@ app.get('/disliked' , async (req ,res) => {
                     postId: "$postDetails._id",
                     description: "$postDetails.description",
                     title: "$postDetails.title",
-                    userId: "$postDetails.user",
+                    userName: "$postDetails.user",
                     codeType: "$postDetails.codeType",
                     html: { $ifNull: ["$postDetails.html", ""] },
                     css: { $ifNull: ["$postDetails.css", ""] },
                     js: { $ifNull: ["$postDetails.js", ""] },
                     react: { $ifNull: ["$postDetails.react", ""] },
-
                 }
             },
-        ])
-
-        // process the resulte
-        console.log(result);
-
-        // return res.status(200).json(result);
-
+        ]);
+        res.status(200).json(result);
     } catch (err) {
-        console.log(err);
-
-        return res.status(500).json({ error: "Internal server error" });
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
     }
+});
 
-})
-
+// to get all Saved of any user by userName
 app.get('/saved' , async (req ,res) => {
     try {
-        const { _id } = req.body;
+        const { userName } = req.body;
+        if (!userName) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
         const result = await users.aggregate([
             {
-                $match: {_id: _id }
+                $match: {_id: userName }
             },
             {
                 $unwind: "$saved"
@@ -141,7 +183,7 @@ app.get('/saved' , async (req ,res) => {
                     postId: "$postDetails._id",
                     description: "$postDetails.description",
                     title: "$postDetails.title",
-                    userId: "$postDetails.user",
+                    userName: "$postDetails.user",
                     codeType: "$postDetails.codeType",
                     html: { $ifNull: ["$postDetails.html", ""] },
                     css: { $ifNull: ["$postDetails.css", ""] },
@@ -165,20 +207,84 @@ app.get('/saved' , async (req ,res) => {
    
 })
 
+// to get Single Post by PostId
 app.get('/post' , async (req ,res) => {
+
+    try {
+        const { postId } = req.body;
+        const singlePost = await posts.aggregate([
+            { $match: { _id: postId } },
+            {$project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+            
+        ])
+        return res.status(200).send(singlePost);
+    } catch (err) {
+        return res.status(500).send('Internal Server Error');
+    }
+
+
 
 })
 
+// deleting Posts using an array which have all Targeted PostId
+app.delete('/deletePost' , async (req ,res) => {
+    try {
+        const { postIdArr } = req.body
+         // Delete all documents from the posts collection by their IDs
+         await posts.deleteMany({ _id: { $in: postIdArr } });
+         return res.status(200).send('all posts deleted')
+    } catch (err) {
+        return res.status(500).send('Internal server error')
+    }
+})
+
+//to get all post of an user by userName
+app.get('/myPost', async (req, res) => {
+    try {
+        const { userName } = req.body;
+        const allPost = await posts.aggregate([
+            { $match: { user: userName } },
+            { $project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+        ]);
+        return res.status(200).send(allPost);
+    } catch (err) {
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// post like updation using "apply" flage
 app.put('/post/like' , async (req ,res) => {
     
-     // using this _id fetch id from "User" collection & add that postId to it
+     // using this UserName fetch id from "User" collection & add that postId to it
     // then find components from "Post" collection by postId and ++likeCnt
     try {
-        const {_id ,apply , postId} = req.body;
+        const {userName ,apply , postId} = req.body;
         if (apply) {
             // apply === true assume not likied before
             await db.users.updateOne(
-                { _id: _id },
+                { _id: userName },
                 { $push: { likes: postId } }
             );
             await db.posts.updateOne(
@@ -188,7 +294,7 @@ app.put('/post/like' , async (req ,res) => {
         } else {
             // apply === false assume likied before
             await db.users.updateOne(
-                { _id: _id },
+                { _id: userName},
                 { $pull: { likes: postId } }
             );
             await db.posts.updateOne(
@@ -204,18 +310,19 @@ app.put('/post/like' , async (req ,res) => {
     }
 })
 
+// post disLike updation using "apply" flage
 app.put('/post/disLike' , async (req ,res) => {
     
     // using this _id fetch id from "User" collection & add that postId to it
     // then find components from "Post" collection by postId and ++disLikeCnt
 
     try {
-        const {_id, apply , postId} = req.body;
+        const {userName, apply , postId} = req.body;
 
         if (apply) {
             // apply === true assume not dislikied before
             await db.users.updateOne(
-                { _id: _id },
+                { _id: userName },
                 { $push: { disLikes: postId } }
             );
             await db.posts.updateOne(
@@ -225,7 +332,7 @@ app.put('/post/disLike' , async (req ,res) => {
         } else {
             // apply === false assume dislikied before
             await db.users.updateOne(
-                { _id: _id },
+                { _id: userName },
                 { $pull: { disLikes: postId } }
             );
             await db.posts.updateOne(
@@ -241,19 +348,20 @@ app.put('/post/disLike' , async (req ,res) => {
     }
 })
 
+// post Saved updation using "apply" flage
 app.put('/post/save' , async (req ,res) => {
     
      // using this _id fetch id from "User" collection & add that postId to it
      try {
-        const {_id ,apply, postId} = req.body;
+        const {userName ,apply, postId} = req.body;
         if(apply){
            await db.users.updateOne(
-                {_id:_id},
+                {_id:userName},
                 { $push: {saved: postId}},
             )
         } else{
             await db.users.updateOne(
-                {_id:_id},
+                {_id:userName},
                 {$pull: {saved: postId} },
             )
         }
@@ -265,33 +373,73 @@ app.put('/post/save' , async (req ,res) => {
      }
 })
 
+// deleting all likes from users collection and decrementing Count from posts collection 
+app.delete('/allLikes', async (req, res) => {
+    try {
+        const { userName, likeArr } = req.body;
+        // Remove all post IDs from the likes array in the users collection
+        await users.updateOne(
+            { _id: userName },
+            { $set: { likes: [] } }
+        );
+        // Decrement the likes count in the posts collection for each post ID
+        await posts.updateMany(
+            { _id: { $in: likeArr } },
+            { $inc: { likes: -1 } }
+        );
+        res.status(200).send('Likes removed and counts updated');
+    } catch (err) {
+        res.status(500).send('Internal server error');
+    }
+});
 
-// app.delete('/post/like' , async (req ,res) => {
-//     const {_id , postId} = req.body;
-//      // using this _id fetch id from "User" collection & Delete that postId to it
-//     // then find components from "Post" collection by postId and --likeCnt
-// })
-// app.delete('/post/disLike' , async (req ,res) => {
-//     const {_id , postId} = req.body;
-//     // using this _id fetch id from "User" collection & delete that postId to it
-//     // then find components from "Post" collection by postId and --disLikeCnt
-// })
-// app.delete('/post/save' , async (req ,res) => {
-//     const {_id , postId} = req.body;
-//      // using this _id fetch id from "User" collection & delete that postId to it
-// })
+// deleting all disLikes from users collection and decrementing Count from posts collection
+app.delete('/allDisLikes' , async (req ,res) => {
+        try {
+            const { userName, disLikeArr } = req.body;
+            // Remove all post IDs from the disLikes array in the users collection
+            await users.updateOne(
+                { _id: userName },
+                { $set: { disLikes: [] } }
+            );
+            // Decrement the disLikes count in the posts collection for each post ID
+            await posts.updateMany(
+                { _id: { $in: disLikeArr } },
+                { $inc: { disLikes: -1 } }
+            );
+            res.status(200).send('disLikes removed and counts updated');
+        } catch (err) {
+            res.status(500).send('Internal server error');
+        }
+    
+})
 
+// deleting all saved from users collection
+app.delete('/allSaved' , async (req ,res) => {
+   try {
+    const { userName } = req.body;
+    await users.updateOne(
+        // Remove all post IDs from the disLikes array in the users collection
+        { _id: userName },
+        { $set: { saved: [] } }
+    );
+    res.status(200).send('Saved removed');
+   } catch (err) {
+       res.status(500).send('Internal server error');
+   }
+})
 
+// this will return only personal details of any user. Not post 
+// to get post by userName goto : '/myPost'
 app.get('/profile' , async (req ,res) =>{
     
-    // find user details by id from "User" then 
-    // find all posts by userId from "Post"
+    // find user details by id from "users" then 
     try {
-        const { _id } = req.body;
-        if(!_id){
+        const { userName } = req.body;
+        if(!userName){
             return res.status(400).send('Id not found')
         }
-        const User = await users.findById(_id);
+        const User = await users.findById(userName);
         if (!User) {
             return res.status(404).send('User not found');
         }
@@ -303,16 +451,17 @@ app.get('/profile' , async (req ,res) =>{
 
 })
 
+// update profile using userName and reqired Fields
 app.patch('/profile', async(req, res) => {
     
     // partial update : update only specified fields
     try {
-        const {_id, fullName , collageName, password, selfDescription, email } = req.body;
-        if(!_id){
+        const {userName, fullName , collageName, password, selfDescription, email } = req.body;
+        if(!userName){
             return res.status(400).send('Id not found')
         }
         const updatedUser = await users.findByIdAndUpdate(
-            _id,
+            userName,
             { fullName, collageName, password, selfDescription, email },
             { new: true }
         );
@@ -327,34 +476,16 @@ app.patch('/profile', async(req, res) => {
     }
 });
 
-
-// Acount deletion
-app.delete('/delete' , async (req ,res) => {
-    const userId = req.body;
-    // find and delete the user from "User" 
-    // also find its all posts from "Post" and delete all the post
-})
-
-app.post('/login' , async(req ,res) => {
-    const {userId ,password} = req.body;
-    if(!userId || !password){
-        res.status(400).send('Username and password are required')
-    }
-    // find user from database then validate it after that send res for succesfull
-    // if not found then through error in res
-
-
-})
-
+// singnUp or Register
 app.post('/signup' , async(req ,res) => {
 
-    // find userId and email from database if it exist then send res -> user already exist.
+    // find userName and email from database if it exist then send res -> user already exist.
     // If not found then create the new instance and store the information.
     // apply middleware also
 
     try {
-        const {_id, fullName, selfDescription ,password ,collageName ,email} = req.body;
-        if(!_id || !password || !email || !fullName){
+        const {userName, fullName, selfDescription ,password ,collageName ,email} = req.body;
+        if(!userName || !password || !email || !fullName){
            return res.status(400).send('Username ,email and password all are required')
         }
 
@@ -362,7 +493,7 @@ app.post('/signup' , async(req ,res) => {
         // bcrypt , authentication , token generation, etc.
 
         const newUser = new users({
-            _id,
+            _id:userName,
             fullName,
             collageName,
             password,
@@ -384,11 +515,12 @@ app.post('/signup' , async(req ,res) => {
 
 })
 
+//adding new post
 app.post('/addpost' , async(req ,res) => {
     try {
-        const {_id ,language ,title ,description ,html ,css ,js ,react} = req.body;
-        if(!language || !title || !_id){
-           return res.status(400).send('userId ,language and title are required or login if not loggedIn')
+        const {userName ,language ,title ,description ,html ,css ,js ,react} = req.body;
+        if(!language || !title || !userName){
+           return res.status(400).send('userName ,language and title are required or login if not loggedIn')
         }
         if(!html && !react){
            return res.status(400).send('code is required')
@@ -396,20 +528,20 @@ app.post('/addpost' , async(req ,res) => {
         // create the post
     
         if(language == 1){ // react
-            const newPost = new Post({
+            const newPost = new posts({
                 title,
                 description,
                 codeType: 1,
                 react,
                 likes: 0,
                 disLikes: 0,
-                user: _id,
+                user: userName,
             })
             await newPost.save();
             return res.status(200).send('Post added sucessfully')
         }
         else if(language == 2){ // non-react with tailwind
-            const newPost = new Post({
+            const newPost = new posts({
                 title,
                 description,
                 codeType: 2,
@@ -417,14 +549,14 @@ app.post('/addpost' , async(req ,res) => {
                 js,
                 likes: 0,
                 disLikes: 0,
-                user: _id,
+                user: userName,
                 
             }) 
             await newPost.save();
             return res.status(200).send('Post added sucessfully')  
         }
         else if(language == 3){ // non-react
-            const newPost = new Post({
+            const newPost = new posts({
                 title,
                 description,
                 codeType: 3,
@@ -433,7 +565,7 @@ app.post('/addpost' , async(req ,res) => {
                 js,
                 likes: 0,
                 disLikes: 0,
-                user: _id,                
+                user: userName,                
             })
             await newPost.save();
             return res.status(200).send('Post added sucessfully')
@@ -446,25 +578,20 @@ app.post('/addpost' , async(req ,res) => {
     }
 })
 
-
-
-db.collection.aggregate([
-    { 
-      $match: { 
-        _id: { 
-          $in: [ 
-            ObjectId("60d5ec49f1c2ab3a1c9f0e01"), 
-            ObjectId("60d5ec49f1c2ab3a1c9f0e02") 
-          ] 
-        } 
-      } 
-    },
-    { 
-      $project: { 
-        field1: 1,  // include field1
-        field2: 1,  // include field2
-        // Exclude _id if you don't need it: _id: 0
-      } 
+app.delete('/delete' , async (req ,res) => {
+    const userName = req.body;
+    // find and delete the user from "User" 
+    // also find its all posts from "Post" and delete all the post
+})
+app.post('/login' , async(req ,res) => {
+    const {userName ,password} = req.body;
+    if(!userName || !password){
+        res.status(400).send('Username and password are required')
     }
-  ])
+    // find user from database then validate it after that send res for succesfull
+    // if not found then through error in res
+
+
+})
+
   
