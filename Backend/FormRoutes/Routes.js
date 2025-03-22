@@ -283,21 +283,21 @@ app.put('/post/like' , async (req ,res) => {
         const {userName ,apply , postId} = req.body;
         if (apply) {
             // apply === true assume not likied before
-            await db.users.updateOne(
+            await users.updateOne(
                 { _id: userName },
                 { $push: { likes: postId } }
             );
-            await db.posts.updateOne(
+            await posts.updateOne(
                 { _id: postId },
                 { $inc: { likes: 1 } }
             );
         } else {
             // apply === false assume likied before
-            await db.users.updateOne(
+            await users.updateOne(
                 { _id: userName},
                 { $pull: { likes: postId } }
             );
-            await db.posts.updateOne(
+            await posts.updateOne(
                 { _id: postId },
                 { $inc: { likes: -1 } }
             );
@@ -527,7 +527,7 @@ app.post('/addpost' , async(req ,res) => {
         }
         // create the post
     
-        if(language == 1){ // react
+        if(language === 1){ // react
             const newPost = new posts({
                 title,
                 description,
@@ -540,22 +540,7 @@ app.post('/addpost' , async(req ,res) => {
             await newPost.save();
             return res.status(200).send('Post added sucessfully')
         }
-        else if(language == 2){ // non-react with tailwind
-            const newPost = new posts({
-                title,
-                description,
-                codeType: 2,
-                html,
-                js,
-                likes: 0,
-                disLikes: 0,
-                user: userName,
-                
-            }) 
-            await newPost.save();
-            return res.status(200).send('Post added sucessfully')  
-        }
-        else if(language == 3){ // non-react
+        else if(language === 2){ // non-react
             const newPost = new posts({
                 title,
                 description,
@@ -570,6 +555,22 @@ app.post('/addpost' , async(req ,res) => {
             await newPost.save();
             return res.status(200).send('Post added sucessfully')
         }
+        else if(language === 3){ // non-react with tailwind
+            const newPost = new posts({
+                title,
+                description,
+                codeType: 2,
+                html,
+                js,
+                likes: 0,
+                disLikes: 0,
+                user: userName,
+                
+            }) 
+            await newPost.save();
+            return res.status(200).send('Post added sucessfully')  
+        }
+
 
         
     } catch (err) {
