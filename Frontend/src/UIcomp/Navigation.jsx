@@ -36,8 +36,8 @@ const Navbar = ({show}) => {
             <Link className={`nav ${THEMES[theme].bar} `} to="/Saved">Saved</Link>
             <Link className={`nav ${THEMES[theme].bar} `} to="/Likes">Likes</Link>
             <Link  className={`nav ${THEMES[theme].bar} `} to="/Dislikes">Dislikes</Link>
-            <Link className={`nav ${THEMES[theme].bar} `} to="/About Us">About Us</Link>
-            <Link className={`nav ${THEMES[theme].bar} `} to="/help">Feedback</Link>
+            <Link className={`nav ${THEMES[theme].bar} `} to="/AboutUs">About Us</Link>
+            <Link className={`nav ${THEMES[theme].bar} `} to="/about">Feedback</Link>
         </div> 
     );
 };

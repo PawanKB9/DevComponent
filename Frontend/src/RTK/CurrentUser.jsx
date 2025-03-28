@@ -1,11 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    allUsers: [],  
-};
+        fullName: '',
+        userName: '',
+        collegeName: '',
+        password: '',
+        email: '',
+        selfDescription: '',
+        likes: [],
+        disLikes: [],
+        saved: [],
+}
 
-const userSlice = createSlice({
-    name: 'users',
+const currentUser = createSlice({
+    name:"currentUser",
     initialState,
     reducers: {
         addField: (state, action) => {
@@ -50,19 +58,31 @@ const userSlice = createSlice({
             }
         },
     }
-});
+})
 
+export const {
+    addField,
+    deleteProfile,
+    addLike,
+    removeLike,
+    addDisLike,
+    removeDisLike,
+    addSaved,
+    removeSaved,
+} = currentUser.actions;
 
+export default currentUser.reducer;
 
-export default userSlice.reducer;
-
-// const hi = {fullName: '',
-//     userName: '',
-//     collageName: '',
-//     password: '',
-//     email: '',
-//     selfDescription: '',
-//     likes: [],
-//     disLikes: [],
-//     saved: [],
-// }
+const deletedReducers = {
+    createProfile: (state, action) => {
+        state.fullName = action.payload.fullName;
+        state.userName = action.payload.userName;
+        state.collegeName = action.payload.collegeName || '';
+        state.password = action.payload.password;
+        state.email = action.payload.email;
+        state.selfDescription = action.payload.selfDescription || '';
+        state.likes = [];
+        state.disLikes = [];
+        state.saved = [];
+    },
+}

@@ -1,23 +1,19 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
-const selectUserInfo = (state, userId) => {
-    const user = state.user.users.find(user => user.userInfo.userId === userId);
-    return user ? user.userInfo : null;
-};
+// const currentUser = useSelector((state) => state.currentUser);
+
+// const selectUserInfo = (state, userName) => {
+//     const user = state.user.users.find(user => user.userName === userName);
+//     return user;
+// };
 const selectFilterArray = (state) => state.appData.filterArray;
 
-// const selectLikes = (state ,userId) => {
-// // these will be from postSlice
-// }
-// const selectDisLikes = (state ,userId) => {
-// // these will be from postSlice
-// }
-// const selectSaved = (state ,userId) => {
-// // these will be from postSlice
-// }
+// const filterArr = useSelector(selectFilterArray);
+
 
 export{
-    selectUserInfo,
+    // selectUserInfo,
     selectFilterArray,
 
 }

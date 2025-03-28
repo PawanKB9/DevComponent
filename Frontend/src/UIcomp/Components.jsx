@@ -2,14 +2,41 @@ import React , { useState  } from "react";
 import { FaThumbsUp, FaThumbsDown, FaSave, FaTrashAlt} from "react-icons/fa";
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
+import { useDispatch } from "react-redux"
+import axios from "axios";
+import { addDisLike, addLike, removeDisLike, removeLike, removeSaved } from "../RTK/CurrentUser.jsx";
+import { dislikePost, likePost } from "../RTK/PostSlice.jsx";
 
-const LikeComponent1 = ({title,UserId}) => {
+
+const API_URL = "http://localhost:8000";
+
+const LikeComponent1 = ({ title,userName,postId,compType }) => {
+  // 1 = like , 2 = disLike , 3 = saved : for compType
+  // const {userName, apply = false , postId} = req.body;
 
     const { theme } = useTheme();
-    const [del , setDel] = useState(false)
+    const apply = false;
+    const dispatch = useDispatch();
 
-    const handleDelete = (e) => {
-
+    const handleDelete = async () => {
+      try {
+        let response = null;
+        if(compType === 1){
+          response = await axios.patch(`${API_URL}/post/like`, { userName, postId, apply }, { withCredentials: true });
+          dispatch(removeLike({postId})); // removing postId from currentUser
+          dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID
+          
+        } else if(compType == 2){
+          response = await axios.patch(`${API_URL}/post/disLike` ,{ userName, postId, apply }, { withCredentials: true } )
+          dispatch(removeDisLike({postId})); // removing postId from currentUser
+          dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
+        } else if(compType == 3){
+          response = await axios.patch(`${API_URL}/post/saved` , { userName, postId, apply }, { withCredentials: true })
+          dispatch(removeSaved({postId})); // removing postId from currentUser
+        }
+      } catch (error) {
+        
+      }
     }
     const NavigatePost = (e) => {
 
@@ -29,7 +56,7 @@ const LikeComponent1 = ({title,UserId}) => {
                    <h2 className="text-xl font-bold">Title/Component Name {title}</h2>
                 </button>
                 <button onClick={NavigateProfile}>
-                   <h2 className="text-lg font-semibold">UserId: who has posted this {UserId}</h2>
+                   <h2 className="text-lg font-semibold">userName: who has posted this {userName}</h2>
                 </button>
             </div>
             <div className="flex text-2xl text-red-500">
@@ -41,13 +68,31 @@ const LikeComponent1 = ({title,UserId}) => {
     )
 }
 
-const LikeComponent2 = ({title,UserId}) => {
+const LikeComponent2 = ({title,userName,postId,compType}) => {
 
     const { theme } = useTheme();
-    const [del , setDel] = useState(false)
 
-    const handleDelete = (e) => {
+    const apply = false;
 
+    const handleDelete = async () => {
+      try {
+        let response = null;
+        if(compType === 1){
+          response = await axios.patch(`${API_URL}/post/like`, { userName, postId, apply }, { withCredentials: true });
+          dispatch(removeLike({postId})); // removing postId from currentUser
+          dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID
+          
+        } else if(compType == 2){
+          response = await axios.patch(`${API_URL}/post/disLike` ,{ userName, postId, apply }, { withCredentials: true } )
+          dispatch(removeDisLike({postId})); // removing postId from currentUser
+          dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
+        } else if(compType == 3){
+          response = await axios.patch(`${API_URL}/post/saved` , { userName, postId, apply }, { withCredentials: true })
+          dispatch(removeSaved({postId})); // removing postId from currentUser
+        }
+      } catch (error) {
+        
+      }
     }
     const NavigatePost = (e) => {
 
@@ -67,7 +112,7 @@ const LikeComponent2 = ({title,UserId}) => {
                    <h2 className="text-xl font-bold">ComponentName {title}</h2>
                 </button>
                 <button onClick={NavigateProfile}>
-                   <h2 className="text-lg font-semibold">UserId: who has posted {UserId}</h2>
+                   <h2 className="text-lg font-semibold">userName: who has posted {userName}</h2>
                 </button>
                 <div className="flex text-2xl text-red-500">
                     <button onClick={handleDelete}><FaTrashAlt/></button>
@@ -78,9 +123,9 @@ const LikeComponent2 = ({title,UserId}) => {
     )
 }
 
-
-const CardComponent = () => {
+const CardComponent = ({postId,userName}) => {
   let likeCnt = 50;
+  const [fullView ,setFullView] = useState(false)
   const [likes, setLikes] = useState(false);
   const [disLikes, setDisLikes] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -88,7 +133,75 @@ const CardComponent = () => {
 
   const description = "This is a sample description of the component which contains more than seven words to demonstrate the read more functionality.";
   const words = description.split(" ");
-  const shortDescription = words.slice(0, 10).join(" ") + (words.length > 7 ? "..." : "");
+  const shortDescription = words.slice(0, 10).join("") + (words.length > 7 ? "..." : "");
+
+  let apply = null;
+  const dispatch = useDispatch();
+
+  const HandleLike = async () => {
+    setLikes(!likes);
+    apply = likes;
+    
+    try {
+      await axios.patch(`${API_URL}/post/like` , { userName, postId, apply }, { withCredentials: true })
+      if(apply){
+        dispatch(addLike({postId}))
+      } else{
+        dispatch(removeLike({postId}))
+      }
+      dispatch(likePost({postId ,apply}))  // manage like count
+      if(disLikes){
+        setDisLikes(false);
+        apply = false;
+        await axios.patch(`${API_URL}/post/disLike` , { userName, postId, apply }, { withCredentials: true })
+        dispatch(removeDisLike({postId})) // removing postId from currentUser
+        dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
+      }
+    } catch (err) {
+      
+    }
+    
+  }
+
+  const HandleDisLike = async () => {
+    setDisLikes(!disLikes);
+    apply = disLikes;
+    
+    try {
+      await axios.patch(`${API_URL}/post/disLike` , { userName, postId, apply }, { withCredentials: true })
+      if(apply){
+        dispatch(addDisLike({postId}))
+      } else{
+        dispatch(removeDisLike({postId}))
+      }
+      dispatch(dislikePost({postId ,apply}));// manage dislike count
+      if(likes){
+        setLikes(false);
+        apply = false;
+        await axios.patch(`${API_URL}/post/like` , { userName, postId, apply }, { withCredentials: true })
+        dispatch(removeLike({postId})); // removing postId from currentUser
+        dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID
+      }
+    } catch (err) {
+      
+    }
+    
+  }
+
+  const HandleSave = async () => {
+    setSaved(!saved)
+    apply = saved;
+    try {
+      await axios.patch(`${API_URL}/post/save` , { userName, postId, apply }, { withCredentials: true })
+      if(apply){
+        dispatch(addSaved({postId}))
+      } else{
+        dispatch(removeSaved({postId}))
+      }
+    } catch (err) {
+      
+    }
+  }
 
   return (
     <div className=" mt-3 p-5 w-full mx-auto bg-gray-100 rounded-lg shadow-md">
@@ -107,22 +220,24 @@ const CardComponent = () => {
       </div>
 
       {/* Component Box */}
-      <div className="my-3 h-70 p-3 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
-        {}
-        the component will be rendered here ...
-      </div>
+      <button onClick={()=>{setFullView(!fullView)}} className="w-full" >
+        <div className={`${fullView ? "h-[60vh]" : "h-70"} my-3 h-70 p-3 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg `}>
+          {}
+          the component will be rendered here ...
+        </div>
+      </button>
 
       {/* Title and Actions */}
       <div>
         <div className ="my-2 font-bold text-lg">Component Name</div>
         <div className={`flex gap-x-5`}>
           <div className={`bg-gray-300  flex gap-x-4 p-1 px-2 rounded-full`}>
-            <button className="block" onClick={() => setLikes(!likes)}><FaThumbsUp  className={`text-xl m-1  ${likes ? "text-rose-600" : ""} `} /></button>
+            <button className="block" onClick={HandleLike}><FaThumbsUp title="Like" className={`text-xl m-1   ${likes ? "text-rose-600" :""} `} /></button>
             {likeCnt} |
-            <button className="block" onClick={() => setDisLikes(!disLikes)}><FaThumbsDown className={`text-xl m-1   ${disLikes ? "text-rose-600" : ""} `} /></button>
+            <button className="block" onClick={HandleDisLike}><FaThumbsDown title="Dislike" className={`text-xl m-1   ${disLikes ? "text-rose-600" : ""} `} /></button>
           </div>
           <div className="bg-gray-300 px-3 pt-1 rounded-full">
-            <button onClick={() => setSaved(!saved)}><FaSave className={`text-xl m-1  ${saved ? "text-rose-600" : "text-gray-900"}`} />
+            <button onClick={HandleSave}><FaSave className={`text-xl m-1  ${saved ? "text-rose-600" : "text-gray-900"}`} />
             </button> 
            <span className="align-top">{saved ? "Saved" : "Save"}</span>
           </div>
@@ -135,7 +250,7 @@ const CardComponent = () => {
         {words.length > 10 && (
           <button 
             className="text-blue-600 ml-2" 
-            onClick={() => setShowFullDescription(!showFullDescription)}
+            onClick={() => {setShowFullDescription(!showFullDescription)}}
           >
             {showFullDescription ? "Show Less" : "Read More"}
           </button>

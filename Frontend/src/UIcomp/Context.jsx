@@ -1,12 +1,15 @@
-import React from "react";
+import React , { useEffect } from "react";
 import { createContext , useContext , useState } from "react";
 
-export const ThemeContext = createContext({
+const ThemeContext = createContext({
     
 }) 
 
-export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState("light");
+ const ThemeProvider = ({ children }) => {
+    const [theme, setTheme] = useState(()=>{return localStorage.getItem('Theme') || "light"});
+    useEffect( () => {
+        localStorage.setItem('Theme',theme);
+    },[theme] )
 
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -17,4 +20,39 @@ export const ThemeProvider = ({ children }) => {
 
 export default function useTheme() {
     return useContext(ThemeContext)
+}
+
+// for form handling to take users data
+ const ActionContext = createContext(null)
+
+ const ActionProvider = ({ children }) => {
+    const [action ,setAction] = useState({
+          fullName: '',
+          userName: '',
+          collageName: '',
+          password: '',
+          email: '',
+          selfDescription: '',
+          likes: [],
+          disLikes: [],
+          saved: [],
+    })
+
+    return (
+        <ActionContext.Provider value={{ action , setAction }} >
+            {children}
+        </ActionContext.Provider>
+    )
+}
+
+ function useAction () {
+    return useContext(ActionContext);
+}
+
+export{
+    useAction,
+    ActionProvider,
+    ActionContext,
+    ThemeProvider,
+    ThemeContext,
 }

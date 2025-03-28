@@ -1,6 +1,7 @@
 import React , { useState } from "react";
 import { LoginSignupForm , VerifyPassword , OtpVerification } from "./UserForm";
 import {  ReactCode ,NonReactCode , PostForm } from "./PostForm";
+import { ActionProvider } from './Context'
 
     const allForms = [
       LoginSignupForm,
@@ -25,9 +26,11 @@ import {  ReactCode ,NonReactCode , PostForm } from "./PostForm";
       const SelectedForm = allForms[currentFormIndex];
     
       return (
-        <div>
-          <SelectedForm navigate={navigate} />
-        </div>
+        <ActionProvider>
+          <div>
+            <SelectedForm navigate={navigate} />
+          </div>
+        </ActionProvider>
       );
     };
     

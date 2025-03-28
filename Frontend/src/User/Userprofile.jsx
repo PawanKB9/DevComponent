@@ -1,13 +1,30 @@
-import React from "react";
-import { FaPen ,FaCamera } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaPen ,FaCamera ,FaSave } from "react-icons/fa";
 
 const UserProfile = ({
-  Name,
-  CollageName,
+  userName = 'PawanKB9',
+  fullName ="Pawan Kumar Bind",
+  collegeName ="HBTU Kanpur",
   profileImg,
   bgImg,
-  Description, 
+  selfDescription='Hi this is Pawan Kumar Bind',
 }) => {
+
+  const [isEditble , setIsEditble] = useState(false);
+  const [name ,setName] = useState(fullName)
+  const [college ,setCollege] = useState(collegeName)
+  const [description ,setDescription] = useState(selfDescription)
+  const HandleUpdate = () => {
+    
+    if(isEditble &&  (name !== currentUser.fullName ||
+      college !== currentUser.collageName ||
+      description !== currentUser.selfDescription)){
+        
+      // trigr the event to save in store
+    }
+    setIsEditble(!isEditble);
+  }
+
   return (
     <div id="linkedInProfile_SPand_ST" className="max-w-[900px] p-2 largePhone:p-4 bg-amber-100">
       <div>
@@ -44,15 +61,18 @@ const UserProfile = ({
           </div>
         </div>
         {/* Edit Icon */}
-        <div className="flex justify-end m-8">
-           <FaPen className="rotate-270" />
+        <div className={`mx-8 mt-12 flex flex-col gap-1 ${isEditble ? '' :'' }`}>
+            <button onClick={HandleUpdate} className="self-end">
+              {isEditble ? <FaSave size={22} /> : <FaPen size={20} />}
+              
+            </button>
+            {/* Profile Details */}
+            <input type="text" readOnly name="userName" value={userName} className={`text-lg font-bold focus:outline-none`} id="" />
+            <input type="text" onChange={(e) => {setName(e.target.value)}} readOnly={!isEditble} name="fullName" value={name} className="focus:outline-none" id="" />
+            <input type="text" onChange={(e) => {setCollege(e.target.value)}} readOnly={!isEditble} name="collegeName" value={college} className="focus:outline-none" id="" />
+            <input type="text" onChange={(e) => {setDescription(e.target.value)}} readOnly={!isEditble} name="Description" value={description} className="focus:outline-none" id="" />
+          
         </div>
-        {/* Profile Details */}
-        <h2 id="nameAndNickName" className="text-lg font-bold">
-          {`Full Name`}
-        </h2>
-        <p>{`Collage Name`}</p>
-        <p>{`Description...`}</p>
 
         
 

@@ -1,29 +1,42 @@
 import React , { useState } from "react";
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
+import { useDispatch } from "react-redux";
+// import { createProfile } from '../RTK/UserSlice.jsx'
+import { useAction } from './Context.jsx'
+import axios from 'axios'
+
+const API_URL = "http://localhost:8000";
+
 
 const LoginSignupForm = ({navigate}) => {
 
     const [userName , setUserName] = useState('');
     const [fullName , setFullName] = useState('')
-    const [CollegeName , setCollegeName] = useState('')
+    const [collegeName , setCollegeName] = useState('')
+    const [selfDescription ,setselfDescription] = useState('')
     const [password , setPassword] = useState('')
-
-    const {theme} = useTheme()
-    
-    function changeForm() {
-        document.getElementById("signUp").classList.toggle("hidden");
-        document.getElementById("logIn").classList.toggle("hidden");
-    }
+    const {theme} = useTheme();
+    const { setAction } = useAction();
 
     const handleLogin = (e) => {
-        e.preventDefault
-        navigate(1)
+        e.preventDefault();
+
+        navigate(3)
     }
     const handleSignUp = (e) => {
-        e.preventDefault
+        e.preventDefault();
+        setAction(prv => ({
+          ...prv ,
+          userName ,fullName ,collegeName ,selfDescription ,password
+        }))
         navigate(1)
     }
+    function changeForm() {
+      document.getElementById("signUp").classList.toggle("hidden");
+      document.getElementById("logIn").classList.toggle("hidden");
+  }
+
       return (
         <div id="loginSignupForm" className={`${THEMES[theme].page2} min-h-screen`}>
           
@@ -33,14 +46,16 @@ const LoginSignupForm = ({navigate}) => {
           <div id="signUp" className={` flex flex-col items-center justify-center`}>
             <form action="#" className={` ${THEMES[theme].outerContainer} p-6 my-14 rounded-lg`}>
               <label htmlFor="userid" className={`${THEMES[theme].labels} my-4 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
-                Enter Unique User-Name / User ID
+                Enter Unique User-Name
               </label>
               
               <input type="text" onChange={(e) => {setUserName(e.target.value)}} value={userName}  id="UserName" name="UserName" placeholder="Enter UserName" required className={`${THEMES[theme].input1} capsuleInputBar`} />
               <input type="text" onChange={(e) => {setFullName(e.target.value)}} value={fullName} id="FullName" name="FullName" placeholder="Full Name" required className={`${THEMES[theme].input2} capsuleInputBar`} />
-              <input type="text" onChange={(e) => {setCollegeName(e.target.value)}} value={CollegeName} id="CollegeName" name="CollegeName" placeholder="College Name" required className={`${THEMES[theme].input1} capsuleInputBar`} />
+              <input type="text" onChange={(e) => {setCollegeName(e.target.value)}} value={collegeName} id="CollegeName" name="CollegeName" placeholder="Collage Name /*Optional"  className={`${THEMES[theme].input1} capsuleInputBar`} />
              
               <input type="password" onChange={(e) => {setPassword(e.target.value)}} value={password} name="password" id="password" placeholder="Enter Strong Password" required className={`${THEMES[theme].input2} capsuleInputBar`} />
+              <input type="text" onChange={(e) => {setselfDescription(e.target.value)}} value={selfDescription} id="SelfDescription" name="SelfDescription" placeholder="Self Description.../*Optional" className={`${THEMES[theme].input1} capsuleInputBar`} />
+
               <button type="submit" onClick={handleSignUp} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Sign Up</button>
               <p className={`largePhone:text-lg mx-4 ${THEMES[theme].text}`}>
                 Already have an account? 
@@ -78,9 +93,14 @@ const VerifyPassword = ({navigate}) => {
 
       const {theme} = useTheme()
       const [email , setEmail] = useState('');
+      const { setAction } = useAction();
 
       const validateInput = (e) => {
-        e.preventDefault();  
+        e.preventDefault();
+        setAction(prv => ({
+          ...prv,
+          email
+        })) 
         navigate(2)     
       };
       
@@ -116,9 +136,22 @@ const VerifyPassword = ({navigate}) => {
 const OtpVerification = ({navigate}) => {
   const { theme } = useTheme();
   const [otp , setOtp] = useState();
-  const VerifyOtp = (e) => {
+  const { action } = useAction();
+  
+  const VerifyOtp = async (e) => {
     e.preventDefault();
-    navigate(3)
+
+    // verify otp first 
+
+    try {
+      const response = await axios.post(`${API_URL}/signUp`,action)
+      const dispatch = useDispatch();
+      // dispatch(createProfile(response));
+      navigate(3)
+      
+    } catch (err) {
+      console.log(err)
+    }
     
   }
 
@@ -147,8 +180,6 @@ const OtpVerification = ({navigate}) => {
   </div>
   )
 }
-
-
 
     export{
         LoginSignupForm,

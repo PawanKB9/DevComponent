@@ -2,20 +2,69 @@ import React , { useState , useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom'
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
+import { useDispatch } from "react-redux";
+import { createPost } from '../RTK/PostSlice.jsx'
+import axios from 'axios'
 
+
+const API_URL = "http://localhost:8000";
+
+// fetch user id if logedIN and no user data , if no logedIn first send 
+// user to logIN and after logIN take userName from userSlice.
+
+// const fetchData = async () => {
+
+//   try {
+//     const userData = await axios.get(`${API_URL}/profile`,{ withCredentials: true })
+//     const { userName } = userData();
+//     // save it store
+
+//   } catch (err) {
+    
+//   }
+// }
 
 const ReactCode = ({}) => {
     
     const {theme} = useTheme()
+    const navigate = useNavigate(); 
+    const dispatch = useDispatch();
 
-    const [titleName ,setTitleName] = useState('')
+    const [titleName , setTitleName] = useState('')
     const [description , setDescription] = useState('')
     const [reactCode , setReactCode] = useState('')
-    const navigate = useNavigate(); 
-    const HandlePost = (e) => {
-      // e.preventDefault();
+
+    const action = {
+      title:titleName,
+      description:description,
+      codeType:1,
+      react:reactCode,
+      likes:0,
+      disLikes:0,
+      user:userName,
+    }
+    const HandlePost = async (e) => {
+      e.preventDefault();
+      if (!titleName || !reactCode) {
+        alert("Please fill all required fields!");
+        return;
+      }
+      try {
+        const respons = await axios.post(`${API_URL}/addpost` , action);
+        
+        dispatch(createPost(respons));
+        setTitleName('')
+        setDescription('')
+        setReactCode('')
+      
+        
+      } catch (err) {
+        
+      }
+      navigate('/');
       
     }
+    
 
 
       return (
@@ -30,7 +79,7 @@ const ReactCode = ({}) => {
               <input type="text" id="name" name="name" value={description} onChange={(e) => {setDescription(e.target.value)}} placeholder="Description about code..." required className={`${THEMES[theme].input2} capsuleInputBar`} />
               <textarea placeholder="Your code goes here..." value={reactCode} onChange={(e) => {setReactCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
               <div className="flex flex-col">
-                <button type="" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
+                <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
                 Skip</button>
                 <button type='submit' onClick={HandlePost} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
               </div>
@@ -46,19 +95,52 @@ const ReactCode = ({}) => {
 const NonReactCode = ({showCss}) => {
     
     const {theme} = useTheme()
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
+    const dispatch = useDispatch();
 
     const [titleName ,setTitleName] = useState('')
     const [description , setDescription] = useState('')
     const [htmlCode , setHtmlCode] = useState('')
     const [cssCode , setCssCode] = useState('')
     const [jsCode , setJsCode] = useState('')
-
-    const HandlePost = (e) => {
-      e.preventDefault();
-
+    let x=2;
+    if(!showCss){
+      x=3;
     }
-    
+    const action = {
+      title:titleName,
+      description:description,
+      codeType:x,
+      html:htmlCode,
+      css:cssCode,
+      js:jsCode,
+      likes:0,
+      disLikes:0,
+      user:userName,
+    }
+
+    const HandlePost = async (e) => {
+      e.preventDefault();
+      if (!titleName || !htmlCode) {
+        alert("Please fill all required fields!");
+        return;
+      }
+      try {
+        const respons = await axios.post(`${API_URL}/addpost` , action)
+        dispatch(createPost(action));
+        setTitleName('');
+        setDescription('');
+        setHtmlCode('');
+        setCssCode('');
+        setJsCode('');
+        x=0;
+
+      } catch (err) {
+        // error here
+      }
+      navigate('/');
+      
+    }
       return (
         <div id="loginSignupForm" className={`${THEMES[theme].page2} min-h-screen`}>
           
@@ -77,7 +159,7 @@ const NonReactCode = ({showCss}) => {
               <textarea placeholder="CSS code" value={cssCode} onChange={(e) => {setCssCode(e.target.value)}} className={`${THEMES[theme].input2} codeArea `}></textarea>}
               <textarea placeholder="JS code" value={jsCode} onChange={(e) => {setJsCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
 
-              <button type="submit" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
+              <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
               Skip</button>
               <button type="submit" onClick={HandlePost} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
            

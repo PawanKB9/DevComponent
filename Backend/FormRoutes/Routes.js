@@ -275,7 +275,7 @@ app.get('/myPost', async (req, res) => {
 });
 
 // post like updation using "apply" flage
-app.put('/post/like' , async (req ,res) => {
+app.patch('/post/like' , async (req ,res) => {
     
      // using this UserName fetch id from "User" collection & add that postId to it
     // then find components from "Post" collection by postId and ++likeCnt
@@ -311,7 +311,7 @@ app.put('/post/like' , async (req ,res) => {
 })
 
 // post disLike updation using "apply" flage
-app.put('/post/disLike' , async (req ,res) => {
+app.patch('/post/disLike' , async (req ,res) => {
     
     // using this _id fetch id from "User" collection & add that postId to it
     // then find components from "Post" collection by postId and ++disLikeCnt
@@ -349,7 +349,7 @@ app.put('/post/disLike' , async (req ,res) => {
 })
 
 // post Saved updation using "apply" flage
-app.put('/post/save' , async (req ,res) => {
+app.patch('/post/save' , async (req ,res) => {
     
      // using this _id fetch id from "User" collection & add that postId to it
      try {
@@ -395,22 +395,22 @@ app.delete('/allLikes', async (req, res) => {
 
 // deleting all disLikes from users collection and decrementing Count from posts collection
 app.delete('/allDisLikes' , async (req ,res) => {
-        try {
-            const { userName, disLikeArr } = req.body;
-            // Remove all post IDs from the disLikes array in the users collection
-            await users.updateOne(
-                { _id: userName },
-                { $set: { disLikes: [] } }
-            );
-            // Decrement the disLikes count in the posts collection for each post ID
-            await posts.updateMany(
-                { _id: { $in: disLikeArr } },
-                { $inc: { disLikes: -1 } }
-            );
-            res.status(200).send('disLikes removed and counts updated');
-        } catch (err) {
-            res.status(500).send('Internal server error');
-        }
+    try {
+        const { userName, disLikeArr } = req.body;
+        // Remove all post IDs from the disLikes array in the users collection
+        await users.updateOne(
+            { _id: userName },
+            { $set: { disLikes: [] } }
+        );
+        // Decrement the disLikes count in the posts collection for each post ID
+        await posts.updateMany(
+            { _id: { $in: disLikeArr } },
+            { $inc: { disLikes: -1 } }
+        );
+        res.status(200).send('disLikes removed and counts updated');
+    } catch (err) {
+        res.status(500).send('Internal server error');
+    }
     
 })
 
@@ -518,16 +518,16 @@ app.post('/signup' , async(req ,res) => {
 //adding new post
 app.post('/addpost' , async(req ,res) => {
     try {
-        const {userName ,language ,title ,description ,html ,css ,js ,react} = req.body;
-        if(!language || !title || !userName){
-           return res.status(400).send('userName ,language and title are required or login if not loggedIn')
+        const {userName ,codeType ,title ,description ,html ,css ,js ,react} = req.body;
+        if(!codeType || !title || !userName){
+           return res.status(400).send('userName ,codeType and title are required or login if not loggedIn')
         }
         if(!html && !react){
            return res.status(400).send('code is required')
         }
         // create the post
     
-        if(language === 1){ // react
+        if(codeType === 1){ // react
             const newPost = new posts({
                 title,
                 description,
@@ -538,13 +538,13 @@ app.post('/addpost' , async(req ,res) => {
                 user: userName,
             })
             await newPost.save();
-            return res.status(200).send('Post added sucessfully')
+            return res.status(200).send(newPost)
         }
-        else if(language === 2){ // non-react
+        else if(codeType === 2){ // non-react
             const newPost = new posts({
                 title,
                 description,
-                codeType: 3,
+                codeType: 2,
                 html,
                 css,
                 js,
@@ -553,13 +553,13 @@ app.post('/addpost' , async(req ,res) => {
                 user: userName,                
             })
             await newPost.save();
-            return res.status(200).send('Post added sucessfully')
+            return res.status(200).send(newPost)
         }
-        else if(language === 3){ // non-react with tailwind
+        else if(codeType === 3){ // non-react with tailwind
             const newPost = new posts({
                 title,
                 description,
-                codeType: 2,
+                codeType: 3,
                 html,
                 js,
                 likes: 0,
@@ -568,7 +568,7 @@ app.post('/addpost' , async(req ,res) => {
                 
             }) 
             await newPost.save();
-            return res.status(200).send('Post added sucessfully')  
+            return res.status(200).send(newPost)  
         }
 
 
