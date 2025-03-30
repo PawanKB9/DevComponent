@@ -71,7 +71,7 @@ export const addPost =  async(req ,res) => {
 // liked posts controller 
 export const likedPost = async (req ,res) => {
     try {
-        const { _id } = req.id;
+        const { _id } = req.body;
         const result = await users.aggregate([
             {
                 $match: {_id: _id }
@@ -108,8 +108,8 @@ export const likedPost = async (req ,res) => {
         ])
 
         // process the result
-        console.log(result);
-        // return res.status(200).json({message:"liked the post" , success:true});
+        // console.log(result);
+        return res.status(200).json({result});
 
     } catch (err) {
         console.log(err);
@@ -158,8 +158,8 @@ export const dislikedPost = async (req ,res) => {
         ])
 
         // process the result
-        console.log(result);
-        // return res.status(200).json(result);
+        // console.log(result);
+        return res.status(200).json(result);
 
     } catch (err) {
         console.log(err);
@@ -207,8 +207,8 @@ export const savedPost = async (req ,res) => {
             },
         ])
         // process the result
-        console.log(result);
-        // return res.status(200).json(result);
+        // console.log(result);
+        return res.status(200).json(result);
 
     } catch (err) {
         console.log(err);
@@ -219,12 +219,12 @@ export const savedPost = async (req ,res) => {
 // like post controller 
 export const likePost = async (req ,res) => {
    try {
-    const id = req.id;
-    const { apply , postId} = req.body;
-    if (apply === true ) {
-        // apply === true assume not liked before
+    // const id = req.id;
+    const { _id,  apply , postId } = req.body;
+    if (apply == "true" ) {
+        // apply === true , assume not liked before
         await users.updateOne(
-            { _id: id },
+            { _id: _id },
             { $push: { likes: postId } }
         );
 
@@ -232,18 +232,20 @@ export const likePost = async (req ,res) => {
             { _id: postId },
             { $inc: { likes: 1 } }
         );
-       } else {
-           // apply === false assume likied before
-           await users.updateOne(
-               { _id: id },
-               { $pull: { likes: postId } }
-           );
-           await posts.updateOne(
-               { _id: postId },
-               { $inc: { likes: -1 } }
-           );
-       }
-       return res.status(200).send('action preformed sucessfully')
+        return res.status(200).send('post liked successfully')
+    } 
+    else {
+        // apply === false assume likied before
+        await users.updateOne(
+            { _id: _id },
+            { $pull: { likes: postId } }
+        );
+        await posts.updateOne(
+            { _id: postId },
+            { $inc: { likes: -1 } }
+        );
+        return res.status(200).send('post disliked successfully')
+    }
 
    } catch (err) {
        console.log(err);
@@ -257,7 +259,7 @@ export const dislikePost = async (req ,res) => {
     try {
         const {_id, apply , postId} = req.body;
 
-        if (apply) {
+        if (apply === "true") {
             // apply === true assume not dislikied before
             await users.updateOne(
                 { _id: _id },
@@ -289,19 +291,20 @@ export const dislikePost = async (req ,res) => {
 // save post controller 
 export const savePost = async (req ,res) => {
     try {
-       const {_id ,apply, postId} = req.body;
-       if(apply){
-          await db.users.updateOne(
+       const { _idid ,apply, postId} = req.body;
+       if(apply === "true"){
+          await users.updateOne(
                {_id:_id},
                { $push: {saved: postId}},
            )
-       } else{
-           await db.users.updateOne(
+       } 
+       else{
+           await users.updateOne(
                {_id:_id},
                {$pull: {saved: postId} },
            )
        }
-       return res.status(200).send('save Updated sucessfully')
+       return res.status(200).send('saved post sucessfully')
 
     } catch (err) {
        console.log(err)

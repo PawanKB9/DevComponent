@@ -22,12 +22,12 @@ router.route("/:filter?").get(filterPost);
 router.route("/addpost").put(isAuthenticated,addPost); 
 
 // like route 
-router.route("/like").put(isAuthenticated,likePost)
+router.route("/like").patch(isAuthenticated,likePost)
 
 // dislike route 
-router.route("/dislike").put(isAuthenticated,dislikePost)
+router.route("/dislike").patch(isAuthenticated,dislikePost)
 
 // saved route 
-router.route("/save").put(isAuthenticated,savePost)
+router.route("/save").patch(isAuthenticated,savePost)
 
 export default router
