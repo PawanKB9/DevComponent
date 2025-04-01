@@ -2,11 +2,98 @@ import express from 'express'
 import { users , posts } from '../DataBase/Schema.js';
 
 const app = express();
+const limit = 10;
+// find posts using both filter
+app.get('/:filter?/:code?', async (req, res) => {
+    try {
+        const filter = req.params.filter || "all";
+        const code = parseInt(req.params.code) || 2;
+        const page = parseInt(req.query.page) || 1;
+        // const limit = parseInt(req.query.limit) || 10;
+        // limit variable decleared on top
+        const skip = (page - 1) * limit;
+        let pipeline = [];
+        if (filter === 'all') {
+            pipeline = [
+                { $match: { codeType: code } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+                { $skip: skip },
+                { $limit: limit }
+            ];
+        } else {
+            pipeline = [
+                { $match: { title: filter, codeType: code } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+                { $skip: skip },
+                { $limit: limit }
+            ];
+        }
+        const result = await posts.aggregate(pipeline).toArray();
+        res.status(200).send(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+    }
+});
+
+// get other user's details by userName (fullName , CollageName , SelfDescription) only
+app.get('/userData' , async (req ,res) => {
+    try {
+        const { userName } = req.query;
+        if(!userName){
+            return res.status(400).send('Id not found')
+        }
+        const data = await users.findOne({ _id: userName }, {
+            projection: {
+                _id: 0,
+                userName: "$_id",
+                fullName: 1,
+                collageName: 1,
+                selfDescription: 1,
+            }
+        });
+        if (!data) {
+            return res.status(404).send('User not found');
+        }
+        res.status(200).send(data);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send('Internal server error')
+    }
+})
+
 
 //find posts using filter
 app.get('/:filter?', async (req, res) => {
     try {
         const filter = req.params.filter || "all";
+        const page = parseInt(req.query.page) || 1;
+        // limit variable decleared on top
+        const skip = (page - 1) * limit;
         let pipeline = [];
         if (filter === 'all') {
             pipeline = [
@@ -23,6 +110,8 @@ app.get('/:filter?', async (req, res) => {
                     js: { $ifNull: ["$js", ""] },
                     react: { $ifNull: ["$react", ""] },
                 }},
+                { $skip: skip },
+                { $limit: limit }
             ];
         } else {
             pipeline = [
@@ -40,9 +129,11 @@ app.get('/:filter?', async (req, res) => {
                     js: { $ifNull: ["$js", ""] },
                     react: { $ifNull: ["$react", ""] },
                 }},
+                { $skip: skip },
+                { $limit: limit }
             ];
         }
-        const result = await posts.aggregate(pipeline);
+        const result = await posts.aggregate(pipeline).toArray();
         res.status(200).send(result);
     } catch (err) {
         console.error(err);
@@ -50,10 +141,12 @@ app.get('/:filter?', async (req, res) => {
     }
 });
 
+
+
 // to get all liked of any user by userName
 app.get('/liked' , async (req ,res) => {
     try {
-        const { userName } = req.body;
+        const { userName } = req.query;
         if (!userName) {
             return res.status(400).json({ error: "User ID is required" });
         }
@@ -108,7 +201,7 @@ app.get('/liked' , async (req ,res) => {
 // to get all disLiked of any user by userName
 app.get('/disliked', async (req, res) => {
     try {
-        const { userName } = req.body;
+        const { userName } = req.query;
         if (!userName) {
             return res.status(400).json({ error: "User ID is required" });
         }
@@ -155,7 +248,7 @@ app.get('/disliked', async (req, res) => {
 // to get all Saved of any user by userName
 app.get('/saved' , async (req ,res) => {
     try {
-        const { userName } = req.body;
+        const { userName } = req.query;
         if (!userName) {
             return res.status(400).json({ error: "User ID is required" });
         }
@@ -252,7 +345,7 @@ app.delete('/deletePost' , async (req ,res) => {
 //to get all post of an user by userName
 app.get('/myPost', async (req, res) => {
     try {
-        const { userName } = req.body;
+        const { userName } = req.query;
         const allPost = await posts.aggregate([
             { $match: { user: userName } },
             { $project: {
@@ -391,7 +484,7 @@ app.delete('/allLikes', async (req, res) => {
     } catch (err) {
         res.status(500).send('Internal server error');
     }
-});
+});                                                                                                                                                                                           
 
 // deleting all disLikes from users collection and decrementing Count from posts collection
 app.delete('/allDisLikes' , async (req ,res) => {

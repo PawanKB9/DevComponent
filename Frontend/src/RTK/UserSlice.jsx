@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    allUsers: [],  
+    allUsers: [],  // only fullName , collageName ,selfDescription , "userName" , profileImg 
 };
 
 const userSlice = createSlice({

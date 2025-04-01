@@ -15,7 +15,24 @@ const Saved = () => {
 
     const DeleteAll = async () => {
         try {
-            const response = await axios.delete(`${API_URL}/allSaved` , {userName ,savedArr} , {withCredentials: true} )
+            const response = await axios.delete(`${API_URL}/allSaved`, {
+                data: { userName, savedArr },
+                withCredentials: true
+            });
+            if(response){
+                dispatch(addField({ saved: [] }));
+            }
+        } catch (err) {
+            
+        }
+    }
+    const DeleteOne = async (postId) => {
+        let savedArr = [postId];
+        try {
+            const response = await axios.delete(`${API_URL}/allSaved`, {
+                data: { userName, savedArr },
+                withCredentials: true
+            });
             if(response){
                 dispatch(addField({ saved: [] }));
             }

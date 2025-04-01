@@ -8,14 +8,30 @@ import { useDispatch } from "react-redux"
 const API_URL = "http://localhost:8000";
 
 const Likes = () => {
-    const likeArr = [id1 , id2, id3];
-    const userName = [userId1];
+    const likeArr = null
+    const userName = null;
     const dispatch = useDispatch();
 
     const DeleteAll = async () => {
         try {
-            const response = await axios.delete(`${API_URL}/allLikes` , {userName ,likeArr} , {withCredentials: true})
+            const response = await axios.delete(`${API_URL}/allLikes`, {
+            data: { userName, likeArr },
+            withCredentials: true });
             if(response){
+                dispatch(addField({ likes: [] })); 
+            }
+        } catch (err) {
+            
+        }
+    }
+
+    const DeleteOne = async (postId) => {
+        let likeArr = [postId];
+        try {
+            const response = await axios.delete(`${API_URL}/allLikes`, {
+            data: { userName, likeArr },
+            withCredentials: true });
+           if(response){
                 dispatch(addField({ likes: [] })); 
             }
         } catch (err) {

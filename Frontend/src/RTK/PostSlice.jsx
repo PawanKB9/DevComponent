@@ -2,8 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 // import { posts } from '../../../Backend/models/post';
 
 const initialState = {
-    posts: [],
+    myDisLikes:[],
+    myLikes:[],
     myPosts:[],
+    mySaved:[],
+    otherUserPosts:[],
+    posts:[],
 };
 
 const postSlice = createSlice({

@@ -1,4 +1,4 @@
-import axios from "axios"
+// import axios from "axios"
 import React , { useState } from "react"
 import { FaTrashAlt } from "react-icons/fa"
 import { LikeComponent1 , LikeComponent2 } from '../UIcomp/Components.jsx'
@@ -8,13 +8,28 @@ import { useDispatch } from "react-redux"
 const API_URL = "http://localhost:8000";
 
 const DisLikes = () => {
-    const disLikeArr = [id1 , id2, id3];
-    const userName = [userId1];
+    const disLikeArr = [0 , 0, 0];
+    const userName = null;
     const dispatch = useDispatch();
 
     const DeleteAll = async () => {
         try {
-            const response = await axios.delete(`${API_URL}/allDisLikes` , {userName ,disLikeArr} , {withCredentials: true} )
+            const response = await axios.delete(`${API_URL}/allDisLikes` , {
+            data: { userName, disLikeArr },
+            withCredentials: true } )
+            if(response){
+                dispatch(addField({ disLikes: [] })); 
+            }
+        } catch (err) {
+            
+        }
+    }
+    const DeleteOne = async (postId) => {
+        let disLikeArr = [postId];
+        try {
+            const response = await axios.delete(`${API_URL}/allDisLikes` , {
+            data: { userName, disLikeArr },
+            withCredentials: true } )
             if(response){
                 dispatch(addField({ disLikes: [] })); 
             }
@@ -34,8 +49,10 @@ const DisLikes = () => {
             </div>
 
             
+                <div className="flex flex-col gap-4">
                 <LikeComponent1/>
                 <LikeComponent2/>
+                </div>
             
         </div>
     )

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
 import { useDispatch } from "react-redux";
-import { createPost } from '../RTK/PostSlice.jsx'
+// import { createPost } from '../RTK/PostSlice.jsx'
 import axios from 'axios'
 
 
@@ -52,7 +52,7 @@ const ReactCode = ({}) => {
       try {
         const respons = await axios.post(`${API_URL}/addpost` , action);
         
-        dispatch(createPost(respons));
+        // dispatch(createPost(respons));
         setTitleName('')
         setDescription('')
         setReactCode('')

@@ -160,6 +160,7 @@ const CardComponent = ({postId,userName}) => {
     } catch (err) {
       
     }
+    setDisLikes(false);
     
   }
 
