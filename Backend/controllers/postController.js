@@ -67,11 +67,11 @@ export const addPost =  async(req ,res) => {
     }
 }
 
-
 // liked posts controller 
 export const likedPost = async (req ,res) => {
     try {
         const { _id } = req.body;
+        
         const result = await users.aggregate([
             {
                 $match: {_id: _id }
@@ -116,7 +116,6 @@ export const likedPost = async (req ,res) => {
         return res.status(500).json({ error: "Internal server error" });
     } 
 }
-
 
 // disliked posts controller 
 export const dislikedPost = async (req ,res) => {
@@ -166,7 +165,6 @@ export const dislikedPost = async (req ,res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
-
 
 // saved posts controller 
 export const savedPost = async (req ,res) => {
@@ -291,7 +289,7 @@ export const dislikePost = async (req ,res) => {
 // save post controller 
 export const savePost = async (req ,res) => {
     try {
-       const { _idid ,apply, postId} = req.body;
+       const { _id ,apply, postId} = req.body;
        if(apply === "true"){
           await users.updateOne(
                {_id:_id},
@@ -312,9 +310,272 @@ export const savePost = async (req ,res) => {
     }
 }
 
-// filter controller 
+// filter controller - 1
 export const filterPost = async (req , res) => {
-    const filter = req.params.filter || "all";
-    // agreegate the data : 1. on basus of most liked , "2. most viewed (not possible in our case)"
-    // send the filtered data as res
+    try {
+        const filter = req.params.filter || "all";
+        let pipeline = [];
+        if (filter === 'all') {
+            pipeline = [
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+            ];
+        } else {
+            pipeline = [
+                { $match: { title: filter } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+            ];
+        }
+        const result = await posts.aggregate(pipeline);
+        res.status(200).send(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+    }
 }
+
+// filter controller - 2
+export const filterCode = async (req , res ) =>{
+    try {
+        const filter = req.params.filter || "all";
+        const code = parseInt(req.params.code) || 2;
+        const page = parseInt(req.query.page) || 1;
+        // const limit = parseInt(req.query.limit) || 10;
+        // limit variable decleared on top
+        const skip = (page - 1) * limit;
+        let pipeline = [];
+        if (filter === 'all') {
+            pipeline = [
+                { $match: { codeType: code } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+                { $skip: skip },
+                { $limit: limit }
+            ];
+        } 
+        else {
+            pipeline = [
+                { $match: { title: filter, codeType: code } },
+                { $sort: { likes: -1 } },
+                { $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                }},
+                { $skip: skip },
+                { $limit: limit }
+            ];
+        }
+        const result = await posts.aggregate(pipeline).toArray();
+        res.status(200).send(result);
+    } 
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+    }
+}
+
+// get post by Id controller 
+export const getPostById = async( req , res ) =>{
+    console.log(req.body); 
+     try {
+        const { postId } = req.body;
+        if (!postId) {
+            return res.status(400).send('Post ID is required');
+        }
+
+        const singlePost = await posts.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(postId) } },
+            {$project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+            
+        ])
+        console.log(singlePost); 
+        if (singlePost.length === 0) {
+            return res.status(404).send('Post not found');
+        }
+        return res.status(200).send("this is the response ");
+    } 
+    catch (err) {
+        return res.status(500).send(err);
+    }
+}
+
+// get all the posts of an user controller 
+export const getMyPosts = async (req, res) => {
+    console.log("hello");
+    try {
+        console.log(req.query); // Log the entire query object
+        const { userName } = req.query;
+        console.log(userName);
+        if (!userName) {
+            return res.status(400).send('Missing userName parameter');
+        }
+        const allPost = await posts.aggregate([
+            { $match: { user: userName } },
+            { $project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+        ]);
+        console.log(allPost);  
+        return res.status(201).json(allPost);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Internal server error');
+    }
+};
+
+// delete all liked posts controller 
+export const deleteAllLiked = async (req , res ) =>{
+    try {
+        const { userName, likeArr } = req.body;
+        // Remove all post IDs from the likes array in the users collection
+        await users.updateOne(
+            { _id: userName },
+            { $set: { likes: [] } }
+        );
+        // Decrement the likes count in the posts collection for each post ID
+        await posts.updateMany(
+            { _id: { $in: likeArr } },
+            { $inc: { likes: -1 } }
+        );
+        res.status(200).send('Likes removed and counts updated');
+    } 
+    catch (err) {
+        res.status(500).send('Internal server error');
+    }
+}
+
+// delete all disLiked posts controller  
+export const deleteAllDisliked = async ( req , res ) =>{
+    try {
+        const { userName, disLikeArr } = req.body;
+        // Remove all post IDs from the disLikes array in the users collection
+        await users.updateOne(
+            { _id: userName },
+            { $set: { disLikes: [] } }
+        );
+        // Decrement the disLikes count in the posts collection for each post ID
+        await posts.updateMany(
+            { _id: { $in: disLikeArr } },
+            { $inc: { disLikes: -1 } }
+        );
+        res.status(200).send('disLikes removed and counts updated');
+       } 
+    catch (err) {
+        res.status(500).send('Internal server error');
+    } 
+}
+
+// delete all saved posts controller 
+export const deleteAllSaved = async( req , res ) =>{
+    try {
+        const { userName } = req.body;
+        await users.updateOne(
+            // Remove all post IDs from the disLikes array in the users collection
+            { _id: userName },
+            { $set: { saved: [] } }
+        );
+        res.status(200).send('Saved removed');
+    } 
+    catch (err) {
+        res.status(500).send('Internal server error');
+    }
+}
+
+// get other user data controller
+export const getUserData = async( req , res ) =>{
+    try {
+        const { userName } = req.query;
+        if(!userName){
+            return res.status(400).send('Id not found')
+        }
+        const data = await users.findOne({ _id: userName }, {
+            projection: {
+                _id: 0,
+                userName: "$_id",
+                fullName: 1,
+                collageName: 1,
+                selfDescription: 1,
+            }
+        });
+        if (!data) {
+            return res.status(404).send('User not found');
+        }
+        res.status(200).send(data);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send('Internal server error')
+    }
+}
+
+// app.delete('/deletePost' , async (req ,res) => {
+//     try {
+//         const { postIdArr } = req.body
+//          // Delete all documents from the posts collection by their IDs
+//          await posts.deleteMany({ _id: { $in: postIdArr } });
+//          return res.status(200).send('all posts deleted')
+//     } catch (err) {
+//         return res.status(500).send('Internal server error')
+//     }
+// })
