@@ -170,6 +170,7 @@ export const dislikedPost = async (req ,res) => {
 export const savedPost = async (req ,res) => {
     try {
         const { _id } = req.body;
+        // console.log(_id); 
         const result = await users.aggregate([
             {
                 $match: {_id: _id }
@@ -361,56 +362,40 @@ export const filterPost = async (req , res) => {
 export const filterCode = async (req , res ) =>{
     try {
         const filter = req.params.filter || "all";
-        const code = parseInt(req.params.code) || 2;
+        const code = req.params.code ? parseInt(req.params.code) : undefined;
         const page = parseInt(req.query.page) || 1;
-        // const limit = parseInt(req.query.limit) || 10;
-        // limit variable decleared on top
+        const limit = parseInt(req.query.limit) || 10; // Assuming limit is declared and set
         const skip = (page - 1) * limit;
-        let pipeline = [];
-        if (filter === 'all') {
-            pipeline = [
-                { $match: { codeType: code } },
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
-        } 
-        else {
-            pipeline = [
-                { $match: { title: filter, codeType: code } },
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
+        let matchStage = {};
+        if (filter !== 'all') {
+            matchStage.title = filter;
+        }
+        if (code !== undefined) {
+            matchStage.codeType = code;
+        }
+        const pipeline = [
+            { $sort: { likes: -1 } },
+            { $project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+            { $skip: skip },
+            { $limit: limit }
+        ];
+        if (filter !== 'all' || code !== undefined) {
+            pipeline.unshift({ $match: matchStage });
         }
         const result = await posts.aggregate(pipeline).toArray();
         res.status(200).send(result);
-    } 
-    catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send('Internal server error');
     }
@@ -453,12 +438,10 @@ export const getPostById = async( req , res ) =>{
 }
 
 // get all the posts of an user controller 
-export const getMyPosts = async (req, res) => {
-    console.log("hello");
+export const allPosts = async (req, res) => {
     try {
-        console.log(req.query); // Log the entire query object
-        const { userName } = req.query;
-        console.log(userName);
+        console.log(req.body); // Log the entire query object
+        const { userName } = req.body;
         if (!userName) {
             return res.status(400).send('Missing userName parameter');
         }
@@ -476,8 +459,7 @@ export const getMyPosts = async (req, res) => {
                 js: { $ifNull: ["$js", ""] },
                 react: { $ifNull: ["$react", ""] },
             }},
-        ]);
-        console.log(allPost);  
+        ]); 
         return res.status(201).json(allPost);
     } catch (err) {
         console.error(err);
@@ -489,11 +471,23 @@ export const getMyPosts = async (req, res) => {
 export const deleteAllLiked = async (req , res ) =>{
     try {
         const { userName, likeArr } = req.body;
-        // Remove all post IDs from the likes array in the users collection
-        await users.updateOne(
-            { _id: userName },
-            { $set: { likes: [] } }
-        );
+        if (!likeArr || likeArr.length === 0) {
+            return res.status(400).send('likeArr is required');
+        }
+           
+          // Remove all post IDs from the likes array in the users collection
+          if (likeArr.length > 1) {
+            await users.updateOne(
+                { _id: userName },
+                { $set: { likes: [] } }
+            );
+        } else if (likeArr.length === 1) { //remove 1 id from user collection
+            await users.updateOne(
+                { _id: userName },
+                { $pull: { likes: likeArr[0] } }
+            );
+        }
+       
         // Decrement the likes count in the posts collection for each post ID
         await posts.updateMany(
             { _id: { $in: likeArr } },
@@ -510,17 +504,27 @@ export const deleteAllLiked = async (req , res ) =>{
 export const deleteAllDisliked = async ( req , res ) =>{
     try {
         const { userName, disLikeArr } = req.body;
-        // Remove all post IDs from the disLikes array in the users collection
-        await users.updateOne(
-            { _id: userName },
-            { $set: { disLikes: [] } }
-        );
+        if (!disLikeArr || disLikeArr.length === 0) {
+            return res.status(400).send('disLikeArr is required');
+        }
+        if (disLikeArr.length > 1) {
+            await users.updateOne(
+                { _id: userName },
+                { $set: { disLikes: [] } }
+            );
+        } 
+        else if (disLikeArr.length === 1) { //remove 1 id from user collection
+            await users.updateOne(
+                { _id: userName },
+                { $pull: { disLikes : disLikeArr[0] } }
+            );
+        }
         // Decrement the disLikes count in the posts collection for each post ID
         await posts.updateMany(
             { _id: { $in: disLikeArr } },
             { $inc: { disLikes: -1 } }
         );
-        res.status(200).send('disLikes removed and counts updated');
+        res.status(200).send('disLikes removed and counts updated sucessfully');
        } 
     catch (err) {
         res.status(500).send('Internal server error');
@@ -532,11 +536,11 @@ export const deleteAllSaved = async( req , res ) =>{
     try {
         const { userName } = req.body;
         await users.updateOne(
-            // Remove all post IDs from the disLikes array in the users collection
+            // Remove all post IDs from the saved array in the users collection
             { _id: userName },
             { $set: { saved: [] } }
         );
-        res.status(200).send('Saved removed');
+        res.status(200).send('Saved removed sucessfully');
     } 
     catch (err) {
         res.status(500).send('Internal server error');

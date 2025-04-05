@@ -1,5 +1,5 @@
 import express from "express"; 
-import { addPost, deleteAllDisliked, deleteAllLiked, deleteAllSaved, dislikedPost, dislikePost, filterCode, filterPost, getMyPosts, getPostById, getUserData, likedPost, likePost, savedPost, savePost } from "../controllers/postController.js";
+import { addPost, allPosts, deleteAllDisliked, deleteAllLiked, deleteAllSaved, dislikedPost, dislikePost, filterCode, filterPost, getPostById, getUserData, likedPost, likePost, savedPost, savePost } from "../controllers/postController.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const router = express.Router(); 
@@ -14,19 +14,21 @@ router.route("/disliked").get(isAuthenticated,dislikedPost);
 router.route("/saved").get(isAuthenticated,savedPost);
 
 // filter post route 
-router.route("/:filter?").get(filterPost); 
+// router.route("/:filter?").get(filterPost); 
 
-// filter for the code route 
-router.route("/:filter?/:code?").get(filterCode); 
-  
+
 // get a post by postId 
 // router.route("/postbyid").get(getPostById); 
 
-// get all posts of an user  
-router.route("/getallposts").get(getMyPosts); 
 
+// get all posts of an user  
+router.route("/allposts").get( isAuthenticated , allPosts); 
+
+// to get all the user data 
 router.route("/userdata").get(getUserData); 
 
+// filter for the code route 
+router.route("/:filter?/:code?").get(filterCode); 
 
 
 // add post route 
