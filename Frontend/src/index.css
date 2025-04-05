@@ -13,16 +13,18 @@
 @layer components {
   .capsuleInputBar {
     @apply  block  mb-6 border largePhone:mb-8 text-lg w-[93vw] p-2 max-w-[430px] mobilePhone:w-[90vw] 
-           mobilePhone:max-w-[658px] mobilePhone:text-xl 
-           largePhone:max-w-[850px] largePhone:text-2xl largePhone:w-[85vw] rounded-full;
+           mobilePhone:max-w-[700px] mobilePhone:text-xl rounded-full;
+  }
+  .rectanglInputBar {
+    @apply  block  mb-6 border largePhone:mb-8 text-lg w-[93vw] p-2 max-w-[430px] mobilePhone:w-[90vw] 
+           mobilePhone:max-w-[700px] mobilePhone:text-xl rounded-lg;
   }
   .codeArea {
     @apply  block h-50 mb-6 border largePhone:mb-8 text-lg w-[93vw] p-2 max-w-[430px] mobilePhone:w-[90vw] 
-           mobilePhone:max-w-[658px] mobilePhone:text-xl 
-           largePhone:max-w-[850px] largePhone:text-2xl largePhone:w-[85vw] rounded-lg;
+           mobilePhone:max-w-[700px] mobilePhone:text-xl rounded-lg;
   }
   .nav{
-    @apply bg-gray-200 py-1 px-2 w-[145px] rounded hover:shadow-lg hover:shadow-green-500 hover:bg-zinc-100;
+    @apply  py-1 px-2 rounded ;
   }
   .glassyEffect{
     @apply bg-white/20   backdrop-blur-sm border border-white/20 rounded-lg
