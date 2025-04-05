@@ -233,9 +233,9 @@ const CardComponent = ({postId,userName}) => {
         <div className ="my-2 font-bold text-lg">Component Name</div>
         <div className={`flex gap-x-5`}>
           <div className={`bg-gray-300  flex gap-x-4 p-1 px-2 rounded-full`}>
-            <button className="block" onClick={HandleLike}><FaThumbsUp title="Like" className={`text-xl m-1   ${likes ? "text-rose-600" :""} `} /></button>
+            <button className="block" onClick={HandleLike}><FaThumbsUp title="Like" className={`text-xl m-1    ${likes ? "text-rose-600" :""} `} /></button>
             {likeCnt} |
-            <button className="block" onClick={HandleDisLike}><FaThumbsDown title="Dislike" className={`text-xl m-1   ${disLikes ? "text-rose-600" : ""} `} /></button>
+            <button className="block" onClick={HandleDisLike}><FaThumbsDown title="Dislike" className={`text-xl m-1  ${disLikes ? "text-rose-600" : ""} `} /></button>
           </div>
           <div className="bg-gray-300 px-3 pt-1 rounded-full">
             <button onClick={HandleSave}><FaSave className={`text-xl m-1  ${saved ? "text-rose-600" : "text-gray-900"}`} />
@@ -244,7 +244,6 @@ const CardComponent = ({postId,userName}) => {
           </div>
         </div>
       </div>
-
       {/* Description */}
       <div className="text-sm text-gray-600 mb-4">
         {showFullDescription ? description : shortDescription}

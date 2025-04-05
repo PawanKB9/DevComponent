@@ -1,7 +1,5 @@
-import React from "react";
-import { useSelector } from "react-redux";
-// import { userApi } from "./UserApi";
-// import { postApi } from "./PostApi";
+import { userApi } from "./UserApi";
+import { postApi } from "./PostApi";
 
 // const currentUser = useSelector((state) => state.currentUser);
 
@@ -11,48 +9,30 @@ import { useSelector } from "react-redux";
 // };
 const selectFilterArray = (state) => state.appData.filterArray;
 
-const filterArr = useSelector(selectFilterArray);
+// const filterArr = useSelector(selectFilterArray);
 
+// postApi selectors
+export const selectGetAllDisLikesResult = postApi.endpoints.getAllDisLikes.select();
+export const selectGetAllLikesResult = postApi.endpoints.getAllLikes.select();
+export const selectGetAllSavedResult = postApi.endpoints.getAllSaved.select();
+export const selectGetFilterPostsResult = postApi.endpoints.getFilterPosts.select();
+export const selectGetMyPostsResult = postApi.endpoints.getMyPosts.select();
 
-// Selectors for Querry from RTK 
-// Selector for getPosts
-const selectGetPosts =  postApi.endpoints.getPosts.select;
+export const selectLazyGetAllDisLikesResult = postApi.endpoints.getAllDisLikes.select();
 
-// Selector for getFilterPosts
-const selectGetFilterPosts =  postApi.endpoints.getFilterPosts.select;
+export const selectCreateNewPostResult = postApi.endpoints.createNewPost.select();
+export const selectDeleteMyPostResult = postApi.endpoints.deleteMyPost.select();
+export const selectUpdateDislikeResult = postApi.endpoints.updateDislike.select();
+export const selectUpdateLikeResult = postApi.endpoints.updateLike.select();
+export const selectUpdateSavedResult = postApi.endpoints.updateSaved.select();
 
-// Selector for getAllLikes
-const selectGetAllLikes =  postApi.endpoints.getAllLikes.select;
-
-// Selector for getAllDisLikes
-const selectGetAllDisLikes =  postApi.endpoints.getAllDisLikes.select;
-
-// Selector for getAllSaved
-const selectGetAllSaved =  postApi.endpoints.getAllSaved.select;
-
-// current user personal data
-const selectUserLoginDetails = userApi.endpoints.getUserDetails.select;
-
-// post of any user by userName
-const selectGetUserPost = userApi.endpoints.getUserPost.select;
-
-// current user personal data
-const selectGetProfileDetails = userApi.endpoints.getProfileDetails.select;
-
-// for other user data FullName,CollageName,selfDescribe, userName
-const selectGetUserData = userApi.endpoints.getUserData.select;
-
-export{
-    // selectUserInfo,
-    selectFilterArray,
-
-    selectGetPosts,
-    selectGetFilterPosts,
-    selectGetAllDisLikes,
-    selectGetAllLikes,
-    selectGetAllSaved,
-    selectGetProfileDetails,
-    selectGetUserData,
-    selectGetUserPost,
-    selectUserLoginDetails,
-}
+// userApi selectors
+export const selectLoginUserResult = userApi.endpoints.loginUser.select;
+export const selectCreateNewUserResult = userApi.endpoints.createNewUser.select;
+export const selectUpdateCurrentUserResult = userApi.endpoints.updateCurrentUser.select;
+export const selectGetCurrentUserResult = userApi.endpoints.getCurrentUser.select;
+export const selectDeleteSavedResult = userApi.endpoints.deleteSaved.select;
+export const selectDeleteDislikesResult = userApi.endpoints.deleteDislikes.select;
+export const selectDeleteLikesResult = userApi.endpoints.deleteLikes.select;
+export const selectGetUserPostResult = userApi.endpoints.getUserPost.select;
+export const selectGetOtherUserDataResult = userApi.endpoints.getOtherUserData.select;

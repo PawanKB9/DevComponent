@@ -1,56 +1,65 @@
 import express from 'express'
-import { users , posts } from '../DataBase/Schema.js';
+import { users , posts, appdata } from '../DataBase/Schema.js';
 
 const app = express();
 const limit = 10;
-// find posts using both filter
+
+app.patch('/addFilter' ,async (req ,res) => {
+    try {
+        const filterData = req.body.filterData || '';
+        let filterArr;
+        if (!filterData) {
+            const data = await appdata.findOne(); 
+            filterArr = data ? data.filterArr : [];
+        } else {
+            filterArr = await appdata.findOneAndUpdate(
+                {},
+                { $push: { filterArr: filterData } },
+                { upsert: true, new: true }
+            );
+        }
+
+        return res.status(200).send(filterArr);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Internal server error");
+    }
+});
+
+//Combined filter
 app.get('/:filter?/:code?', async (req, res) => {
     try {
         const filter = req.params.filter || "all";
-        const code = parseInt(req.params.code) || 2;
+        const code = req.params.code ? parseInt(req.params.code) : undefined;
         const page = parseInt(req.query.page) || 1;
-        // const limit = parseInt(req.query.limit) || 10;
-        // limit variable decleared on top
+        // const limit = parseInt(req.query.limit) || 10; // limit is decleared above
         const skip = (page - 1) * limit;
-        let pipeline = [];
-        if (filter === 'all') {
-            pipeline = [
-                { $match: { codeType: code } },
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
-        } else {
-            pipeline = [
-                { $match: { title: filter, codeType: code } },
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
+        let matchStage = {};
+        if (filter !== 'all') {
+            matchStage.title = filter;
+        }
+        if (code !== undefined) {
+            matchStage.codeType = code;
+        }
+        const pipeline = [
+            { $sort: { likes: -1 } },
+            { $project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+            { $skip: skip },
+            { $limit: limit }
+        ];
+        if (filter !== 'all' || code !== undefined) {
+            pipeline.unshift({ $match: matchStage });
         }
         const result = await posts.aggregate(pipeline).toArray();
         res.status(200).send(result);
@@ -59,6 +68,117 @@ app.get('/:filter?/:code?', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
+
+// // find posts using both filter
+// app.get('/:filter?/:code?', async (req, res) => {
+//     try {
+//         const filter = req.params.filter || "all";
+//         const code = parseInt(req.params.code) || 2;
+//         const page = parseInt(req.query.page) || 1;
+//         // const limit = parseInt(req.query.limit) || 10;
+//         // limit variable decleared on top
+//         const skip = (page - 1) * limit;
+//         let pipeline = [];
+//         if (filter === 'all') {
+//             pipeline = [
+//                 { $match: { codeType: code } },
+//                 { $sort: { likes: -1 } },
+//                 { $project: {
+//                     _id: 0,
+//                     postId: "$_id",
+//                     description: "$description",
+//                     title: "$title",
+//                     userName: "$user",
+//                     codeType: "$codeType",
+//                     html: { $ifNull: ["$html", ""] },
+//                     css: { $ifNull: ["$css", ""] },
+//                     js: { $ifNull: ["$js", ""] },
+//                     react: { $ifNull: ["$react", ""] },
+//                 }},
+//                 { $skip: skip },
+//                 { $limit: limit }
+//             ];
+//         } else {
+//             pipeline = [
+//                 { $match: { title: filter, codeType: code } },
+//                 { $sort: { likes: -1 } },
+//                 { $project: {
+//                     _id: 0,
+//                     postId: "$_id",
+//                     description: "$description",
+//                     title: "$title",
+//                     userName: "$user",
+//                     codeType: "$codeType",
+//                     html: { $ifNull: ["$html", ""] },
+//                     css: { $ifNull: ["$css", ""] },
+//                     js: { $ifNull: ["$js", ""] },
+//                     react: { $ifNull: ["$react", ""] },
+//                 }},
+//                 { $skip: skip },
+//                 { $limit: limit }
+//             ];
+//         }
+//         const result = await posts.aggregate(pipeline).toArray();
+//         res.status(200).send(result);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Internal server error');
+//     }
+// }); //done
+
+// //find posts using filter
+// app.get('/:filter?', async (req, res) => {
+//     try {
+//         const filter = req.params.filter || "all";
+//         const page = parseInt(req.query.page) || 1;
+//         // limit variable decleared on top
+//         const skip = (page - 1) * limit;
+//         let pipeline = [];
+//         if (filter === 'all') {
+//             pipeline = [
+//                 { $sort: { likes: -1 } },
+//                 { $project: {
+//                     _id: 0,
+//                     postId: "$_id",
+//                     description: "$description",
+//                     title: "$title",
+//                     userName: "$user",
+//                     codeType: "$codeType",
+//                     html: { $ifNull: ["$html", ""] },
+//                     css: { $ifNull: ["$css", ""] },
+//                     js: { $ifNull: ["$js", ""] },
+//                     react: { $ifNull: ["$react", ""] },
+//                 }},
+//                 { $skip: skip },
+//                 { $limit: limit }
+//             ];
+//         } else {
+//             pipeline = [
+//                 { $match: { title: filter } },
+//                 { $sort: { likes: -1 } },
+//                 { $project: {
+//                     _id: 0,
+//                     postId: "$_id",
+//                     description: "$description",
+//                     title: "$title",
+//                     userName: "$user",
+//                     codeType: "$codeType",
+//                     html: { $ifNull: ["$html", ""] },
+//                     css: { $ifNull: ["$css", ""] },
+//                     js: { $ifNull: ["$js", ""] },
+//                     react: { $ifNull: ["$react", ""] },
+//                 }},
+//                 { $skip: skip },
+//                 { $limit: limit }
+//             ];
+//         }
+//         const result = await posts.aggregate(pipeline).toArray();
+//         res.status(200).send(result);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Internal server error');
+//     }
+// }); //done
 
 // get other user's details by userName (fullName , CollageName , SelfDescription) only
 app.get('/userData' , async (req ,res) => {
@@ -84,64 +204,7 @@ app.get('/userData' , async (req ,res) => {
         console.log(err)
         res.status(500).send('Internal server error')
     }
-})
-
-
-//find posts using filter
-app.get('/:filter?', async (req, res) => {
-    try {
-        const filter = req.params.filter || "all";
-        const page = parseInt(req.query.page) || 1;
-        // limit variable decleared on top
-        const skip = (page - 1) * limit;
-        let pipeline = [];
-        if (filter === 'all') {
-            pipeline = [
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
-        } else {
-            pipeline = [
-                { $match: { title: filter } },
-                { $sort: { likes: -1 } },
-                { $project: {
-                    _id: 0,
-                    postId: "$_id",
-                    description: "$description",
-                    title: "$title",
-                    userName: "$user",
-                    codeType: "$codeType",
-                    html: { $ifNull: ["$html", ""] },
-                    css: { $ifNull: ["$css", ""] },
-                    js: { $ifNull: ["$js", ""] },
-                    react: { $ifNull: ["$react", ""] },
-                }},
-                { $skip: skip },
-                { $limit: limit }
-            ];
-        }
-        const result = await posts.aggregate(pipeline).toArray();
-        res.status(200).send(result);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Internal server error');
-    }
-});
-
-
+}) // done
 
 // to get all liked of any user by userName
 app.get('/liked' , async (req ,res) => {
@@ -196,7 +259,7 @@ app.get('/liked' , async (req ,res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
    
-})
+}) //done
 
 // to get all disLiked of any user by userName
 app.get('/disliked', async (req, res) => {
@@ -243,7 +306,7 @@ app.get('/disliked', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Internal server error" });
     }
-});
+}); // done
 
 // to get all Saved of any user by userName
 app.get('/saved' , async (req ,res) => {
@@ -298,7 +361,7 @@ app.get('/saved' , async (req ,res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
    
-})
+}) //done
 
 // to get Single Post by PostId
 app.get('/post' , async (req ,res) => {
@@ -340,7 +403,7 @@ app.delete('/deletePost' , async (req ,res) => {
     } catch (err) {
         return res.status(500).send('Internal server error')
     }
-})
+}) // done
 
 //to get all post of an user by userName
 app.get('/myPost', async (req, res) => {
@@ -365,7 +428,7 @@ app.get('/myPost', async (req, res) => {
     } catch (err) {
         return res.status(500).send('Internal server error');
     }
-});
+}); // done
 
 // post like updation using "apply" flage
 app.patch('/post/like' , async (req ,res) => {
@@ -470,31 +533,55 @@ app.patch('/post/save' , async (req ,res) => {
 app.delete('/allLikes', async (req, res) => {
     try {
         const { userName, likeArr } = req.body;
+
+        if (!likeArr || likeArr.length === 0) {
+            return res.status(400).send('likeArr is required');
+        }
+
         // Remove all post IDs from the likes array in the users collection
-        await users.updateOne(
-            { _id: userName },
-            { $set: { likes: [] } }
-        );
+        if (likeArr.length > 1) {
+            await users.updateOne(
+                { _id: userName },
+                { $set: { likes: [] } }
+            );
+        } else if (likeArr.length === 1) { //remove id from users collection
+            await users.updateOne(
+                { _id: userName },
+                { $pull: { likes: likeArr[0] } }
+            );
+        }
         // Decrement the likes count in the posts collection for each post ID
         await posts.updateMany(
             { _id: { $in: likeArr } },
             { $inc: { likes: -1 } }
         );
+
         res.status(200).send('Likes removed and counts updated');
     } catch (err) {
         res.status(500).send('Internal server error');
     }
-});                                                                                                                                                                                           
+}); //done                                                                                                                                                                                     
 
 // deleting all disLikes from users collection and decrementing Count from posts collection
 app.delete('/allDisLikes' , async (req ,res) => {
     try {
         const { userName, disLikeArr } = req.body;
+        if (!disLikeArr || disLikeArr.length === 0) {
+            return res.status(400).send('disLikeArr is required');
+        }
+
         // Remove all post IDs from the disLikes array in the users collection
-        await users.updateOne(
-            { _id: userName },
-            { $set: { disLikes: [] } }
-        );
+        if (disLikeArr.length > 1) {
+            await users.updateOne(
+                { _id: userName },
+                { $set: { disLikes: [] } }
+            );
+        } else if (disLikeArr.length === 1) {
+            await users.updateOne(
+                { _id: userName },
+                { $pull: { disLikes: disLikeArr[0] } }
+            );
+        }
         // Decrement the disLikes count in the posts collection for each post ID
         await posts.updateMany(
             { _id: { $in: disLikeArr } },
@@ -505,22 +592,33 @@ app.delete('/allDisLikes' , async (req ,res) => {
         res.status(500).send('Internal server error');
     }
     
-})
+}) // done
 
 // deleting all saved from users collection
 app.delete('/allSaved' , async (req ,res) => {
    try {
-    const { userName } = req.body;
-    await users.updateOne(
-        // Remove all post IDs from the disLikes array in the users collection
-        { _id: userName },
-        { $set: { saved: [] } }
-    );
+    const { userName ,savedArr} = req.body;
+
+    if(!savedArr || savedArr.length === 0){
+        return res.status(400).send('Saved array is required')
+    }
+    if(savedArr.length > 1){
+        await users.updateOne(
+            // Remove all post IDs from the disLikes array in the users collection
+            { _id: userName },
+            { $set: { saved: [] } }
+        );
+    } else if(savedArr.length === 1){
+        await users.updateOne(
+            {_id:userName},
+            {$pull:{saved:savedArr[0]}}
+        )
+    }
     res.status(200).send('Saved removed');
    } catch (err) {
        res.status(500).send('Internal server error');
    }
-})
+}) //done
 
 // this will return only personal details of any user. Not post 
 // to get post by userName goto : '/myPost'
@@ -542,32 +640,36 @@ app.get('/profile' , async (req ,res) =>{
         return res.status(500).send('Internal server error')
     }
 
-})
+})//done
 
 // update profile using userName and reqired Fields
-app.patch('/profile', async(req, res) => {
-    
-    // partial update : update only specified fields
+app.patch('/profile', async (req, res) => {
     try {
-        const {userName, fullName , collageName, password, selfDescription, email } = req.body;
-        if(!userName){
-            return res.status(400).send('Id not found')
-        }
-        const updatedUser = await users.findByIdAndUpdate(
-            userName,
-            { fullName, collageName, password, selfDescription, email },
-            { new: true }
-        );
-        if (!updatedUser) {
-            return res.status(404).send('User not found');
-        }
-        return res.status(200).send(`updated sucessfully ${updatedUser}`)
+        const { userName, ...updateFields } = req.body;
 
+        if (!userName) {
+            return res.status(400).send('userName is required');
+        }
+
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).send('No fields to update');
+        }
+
+        const result = await users.updateOne(
+            { _id: userName },
+            { $set: updateFields }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).send('User not found or no changes made');
+        }
+
+        res.status(200).send('Profile updated successfully');
     } catch (err) {
-        console.log(err)
-        return res.status(500).send('Internal server error')
+        console.error(err);
+        res.status(500).send('Internal server error');
     }
-});
+}); // done and changed in the controler
 
 // singnUp or Register
 app.post('/signup' , async(req ,res) => {
@@ -606,7 +708,7 @@ app.post('/signup' , async(req ,res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 
-})
+}) //done
 
 //adding new post
 app.post('/addpost' , async(req ,res) => {
@@ -670,13 +772,8 @@ app.post('/addpost' , async(req ,res) => {
         console.log(err);
         return res.status(500).json({ error: "Internal server error" });
     }
-})
+})//done
 
-app.delete('/delete' , async (req ,res) => {
-    const userName = req.body;
-    // find and delete the user from "User" 
-    // also find its all posts from "Post" and delete all the post
-})
 app.post('/login' , async(req ,res) => {
     const {userName ,password} = req.body;
     if(!userName || !password){
@@ -686,6 +783,11 @@ app.post('/login' , async(req ,res) => {
     // if not found then through error in res
 
 
-})
+}) //done
 
-  
+// app.delete('/delete' , async (req ,res) => {
+//     const userName = req.body;
+//     // find and delete the user from "User" 
+//     // also find its all posts from "Post" and delete all the post
+// })
+

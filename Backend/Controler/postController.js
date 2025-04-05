@@ -67,7 +67,6 @@ export const addPost =  async(req ,res) => {
     }
 }
 
-
 // liked posts controller 
 export const likedPost = async (req ,res) => {
     try {

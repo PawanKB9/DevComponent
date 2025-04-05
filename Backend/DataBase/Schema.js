@@ -1,11 +1,19 @@
 import mongoose from "mongoose";
 
+const appSchema = new mongoose.Schema({
+    filterArr: {
+        type: [String],
+        default: []
+    },
+});
+
+
 // _id:{
 //     type:String,
 //     required:true,
 //     unique:true
 // },
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
     fullName:{
         type:String,
         required:true
@@ -39,7 +47,7 @@ const userSchema = mongoose.Schema({
     }]
 })
 
-const postSchema = mongoose.Schema({
+const postSchema = new mongoose.Schema({
     title:{
         type:String,
         required:true
@@ -83,8 +91,10 @@ const postSchema = mongoose.Schema({
 
 const users = mongoose.model('users' , userSchema);
 const posts = mongoose.model('posts' , postSchema);
+const appdata = mongoose.model('appdata' , appSchema)
 
 export{
     users,
     posts,
+    appdata,
 }

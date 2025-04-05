@@ -27,7 +27,7 @@ const LoginSignupForm = ({navigate}) => {
     const handleSignUp = (e) => {
         e.preventDefault();
         setAction(prv => ({
-          ...prv ,
+          ...prv,
           userName ,fullName ,collegeName ,selfDescription ,password
         }))
         navigate(1)
@@ -39,10 +39,7 @@ const LoginSignupForm = ({navigate}) => {
 
       return (
         <div id="loginSignupForm" className={`${THEMES[theme].page2} min-h-screen`}>
-          
-    
-           
-    
+
           <div id="signUp" className={` flex flex-col items-center justify-center`}>
             <form action="#" className={` ${THEMES[theme].outerContainer} p-6 my-14 rounded-lg`}>
               <label htmlFor="userid" className={`${THEMES[theme].labels} my-4 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
