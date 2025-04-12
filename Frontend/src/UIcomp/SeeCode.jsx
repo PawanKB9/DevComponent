@@ -51,7 +51,7 @@ const CodePreview = ({ html, css, js, reactCode }) => {
 
   return (
     <div className="preview-container bg-gray-100 rounded-lg h-40">
-      <iframe ref={iframeRef} title="Output" className=" mx-auto w-full h-40 border rounded-lg flex justify-center"></iframe>
+      <iframe ref={iframeRef} title="Output" className="mx-auto w-full h-58 flex justify-center"></iframe>
     </div>
   );
 };
@@ -61,28 +61,7 @@ const SeeCode = () => {
     const css = ``; 
     const js = ``; 
 
-    const reactCode = <nav className="bg-blue-500 p-4">
-    <div className="container mx-auto flex justify-between items-center">
-      {/* Logo */}
-      <div className="text-white text-lg font-bold">MyLogo</div>
-      
-      {/* Navigation Links */}
-      <ul className="flex space-x-4">
-        <li>
-          <a href="#home" className="text-white hover:text-gray-200">Home</a>
-        </li>
-        <li>
-          <a href="#about" className="text-white hover:text-gray-200">About</a>
-        </li>
-        <li>
-          <a href="#services" className="text-white hover:text-gray-200">Services</a>
-        </li>
-        <li>
-          <a href="#contact" className="text-white hover:text-gray-200">Contact</a>
-        </li>
-      </ul>
-    </div>
-  </nav>  
+    const reactCode = ``; 
   
   return (
     <div>

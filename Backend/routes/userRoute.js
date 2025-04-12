@@ -1,5 +1,5 @@
 import express from "express"; 
-import { login, logout, register, seeProfile, updateProfile } from "../controllers/userController.js";
+import { changePassword, forgotPassword, login, logout, register, seeProfile, updateProfile } from "../controllers/userController.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js"
 
 const router = express.Router(); 
@@ -18,5 +18,12 @@ router.route("/profile").get(isAuthenticated ,seeProfile);
 
 // Update Profile route 
 router.route("/profile").patch( isAuthenticated , updateProfile); 
+
+// change password route 
+router.route("/changePassowrd").post(isAuthenticated, changePassword); 
+
+// forgot password route 
+router.route("/forgotpassword").post( forgotPassword ); 
+
 
 export default router;

@@ -157,3 +157,54 @@ export const updateProfile =  async(req, res) => {
         return res.status(500).send('Internal server error')
     }
 }
+
+// change password controller 
+export const changePassword = async (req ,res) => {
+    try {
+        // first authenticate the user and extract userName from cookies
+        const { oldPassword ,newPassword , userName} = req.body;
+        const User = await users.findById(userName);
+        if (!User) {
+            return res.status(404).send('User not found');
+        }
+
+        // match oldPassword with saved password      
+        const correctPass = await bcrypt.compare( oldPassword , User.password); 
+        if( correctPass != true ){ 
+            return res.status(404).send('Incorrect Password');
+        }
+        const email = User.email;
+        // send otp to Email or make type on "YES I am IN" -> button
+
+        // save new password in incripted form
+        const bcryptedPass = await bcrypt.hash( newPassword, 10);
+        users.updateOne({_id : userName} ,{$set: { password: bcryptedPass }}); 
+
+        return res.status(200).send('password updated successfully');
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send('Internal server error')
+    }
+}
+
+// forgot password controller 
+export const forgotPassword =  async (req ,res) => {
+    try {
+        const { email ,password } = req.body;
+        const User = await users.findOne({email});
+        if (!User) {
+            return res.status(404).send('User not found');
+        }
+        // send otp to Email or make type on "YES I am IN" -> button
+
+        // save this password in increpted form
+       const bcryptedPass = await bcrypt.hash( password , 10 ); 
+        users.updateOne({_id : User.userName} ,{$set: { password: bcryptedPass }});
+
+        return res.status(200).send('password updated successfully');
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send('Internal server error')
+    }
+}
