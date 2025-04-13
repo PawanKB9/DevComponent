@@ -249,7 +249,7 @@ const CardComponent = ({postId,userName}) => {
       </div>
       {/* Boxes and Buttons */}
       {
-        !show && <div className= "my-3 h-60 p-4 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
+        !show && <div className= "my-3 p-4 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
         <CodeEditor html={html} css={css} js={js} reactCode={reactCode} />
     </div>
       }

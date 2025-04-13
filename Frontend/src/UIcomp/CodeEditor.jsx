@@ -24,7 +24,6 @@ const CodePreview = ({ html, css, js, reactCode }) => {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 160px;
             margin: 0;
           }
           ${css}
@@ -50,8 +49,8 @@ const CodePreview = ({ html, css, js, reactCode }) => {
   }, [html , css , js , reactCode]);
 
   return (
-    <div className="bg-gray-100 rounded-lg h-40">
-      <iframe ref={iframeRef} title="Output" className="mx-auto w-full h-58 flex justify-center"></iframe>
+    <div className="bg-gray-100 rounded-lg ">
+      <iframe ref={iframeRef} title="Output" className="mx-auto w-full flex justify-center"></iframe>
     </div>
   );
 };
@@ -59,7 +58,7 @@ const CodePreview = ({ html, css, js, reactCode }) => {
 const SeeCode = ({ html , css , js , reactCode} ) => {
   
   return (
-    <div className="editor-container p-4  text-white  flex flex-col gap-4">
+    <div className="editor-container p-4 text-white  flex flex-col gap-4">
       {/* <h2 className="text-2xl font-bold text-center">Live Code Editor</h2> */}
       <CodePreview html={html} css={css} js={js} reactCode={reactCode} />
     </div>
