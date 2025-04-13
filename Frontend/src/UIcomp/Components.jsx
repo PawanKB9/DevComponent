@@ -2,15 +2,163 @@ import React , { useState  } from "react";
 import { FaThumbsUp, FaThumbsDown, FaSave, FaTrashAlt} from "react-icons/fa";
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
-import { useDispatch } from "react-redux"
-import axios from "axios";
-import { addDisLike, addLike, removeDisLike, removeLike, removeSaved } from "../RTK/CurrentUser.jsx";
-import { dislikePost, likePost } from "../RTK/PostSlice.jsx";
+import { useDispatch ,useSelector} from "react-redux"
+// import axios from "axios";
+// import { addDisLike, addLike, removeDisLike, removeLike, removeSaved } from "../RTK/CurrentUser.jsx";
+// import { dislikePost, likePost } from "../RTK/PostSlice.jsx";
+import { useNavigate } from "react-router-dom";
+import { useUpdateLikeMutation ,useUpdateSavedMutation ,useUpdateDislikeMutation } from '../RTK/PostApi.jsx'
+import {selectGetAllLikesResult ,selectGetAllDisLikesResult ,selectGetAllSavedResult ,selectGetMyPostsResult} from '../RTK/Selectors.jsx';
+// import {UserApi} from '../RTK/UserApi.jsx';
+
+// const API_URL = "http://localhost:8000";
+
+const LikeCard = ({ title, description ,postId ,userName}) => {
+
+  const { theme } = useTheme();
+  const shortDescription =
+  description.length > 25 ? description.slice(0, 25) + "..." : description;
+
+  const navigate = useNavigate()
+  const cachedLikes = useSelector(selectGetAllLikesResult);
+  const gotoPost = () => {
+    const post = cachedLikes.find(p => p.postId === postId);
+    if (post) {
+      const { title, html, css, js, react, userName } = post;
+      navigate('/post-view', {
+        state: { title, html, css, js, react, userName },
+      });
+    }
+  }
+  const gotoUserProfile = () => {
+    
+  }
+
+  return(
+    <div className='p-2 bg-amber-100 rounded-lg w-full'>
+    <div className='flex justify-between px-3 py-2 text-xl font-bold'>
+      <button onClick={gotoPost}>{title}</button> |
+      <button onClick={gotoUserProfile}>{userName}</button>
+    </div>
+    <hr />
+    <p className='text-center'>{shortDescription}</p>
+  </div>
+  )
+}
+
+const DisLikeCard = ({ title, description ,postId ,userName}) => {
+
+  const { theme } = useTheme();
+  const shortDescription =
+  description.length > 25 ? description.slice(0, 25) + "..." : description;
+
+  const navigate = useNavigate()
+  const cachedDisLikes = useSelector(selectGetAllDisLikesResult);
+
+  const gotoPost = () => {
+    const post = cachedDisLikes.find(p => p.postId === postId);
+    if (post) {
+      const { title, html, css, js, react, userName } = post;
+      navigate('/post-view', {
+        state: { title, html, css, js, react, userName },
+      });
+    }
+  }
+  const gotoUserProfile = () => {
+    
+  }
+
+  return(
+    <div className='p-2 bg-amber-100 rounded-lg w-full'>
+    <div className='flex justify-between px-3 py-2 text-xl font-bold'>
+      <button onClick={gotoPost}>{title}</button> |
+      <button onClick={gotoUserProfile}>{userName}</button>
+    </div>
+    <hr />
+    <p className='text-center'>{shortDescription}</p>
+  </div>
+  )
+}
+
+const SavedCard = ({ title, description ,postId ,userName}) => {
+
+  const { theme } = useTheme();
+  const shortDescription =
+  description.length > 25 ? description.slice(0, 25) + "..." : description;
+
+  const navigate = useNavigate()
+  const cachedSaved = useSelector(selectGetAllSavedResult);
+  const gotoPost = () => {
+    const post = cachedSaved.find(p => p.postId === postId);
+    if (post) {
+      const { title, html, css, js, react, userName } = post;
+      navigate('/post-view', {
+        state: { title, html, css, js, react, userName },
+      });
+    }
+  }
+  const gotoUserProfile = () => {
+    
+  }
+
+  return(
+    <div className='p-2 bg-amber-100 rounded-lg w-full'>
+    <div className='flex justify-between px-3 py-2 text-xl font-bold'>
+      <button onClick={gotoPost}>{title}</button> |
+      <button onClick={gotoUserProfile}>{userName}</button>
+    </div>
+    <hr />
+    <p className='text-center'>{shortDescription}</p>
+  </div>
+  )
+}
+
+const PostCard = ({ title, description ,postId ,userName}) => {
+  const { theme } = useTheme();
+
+  const shortDescription =
+    description.length > 15 ? description.slice(0, 15) + "..." : description;
+
+  const navigate = useNavigate()
+  const myPosts = useSelector(selectGetMyPostsResult);
+  const gotoPost = () => {
+    const post = myPosts.find(p => p.postId === postId);
+    if (post) {
+      const { title, html, css, js, react, userName } = post;
+      navigate('/post-view', {
+        state: { title, html, css, js, react, userName },
+      });
+    }
+  };
+
+  return (
+    <button onClick={gotoPost} className='bg-amber-100 p-3 rounded-md text-left w-full'>
+      <div className='text-lg font-semibold my-2'>{title}</div>
+      <p>{shortDescription}</p>
+    </button>
+  );
+};
+
+// const OtherPostCard = ({ title, description ,postId ,userName}) => {
+//   const { theme } = useTheme();
+
+//   const shortDescription =
+//     description.length > 15 ? description.slice(0, 15) + "..." : description;
+
+//   const gotoPost = () => {
+//     // handle navigation here
+//   };
+
+//   return (
+//     <button onClick={gotoPost} className='bg-amber-100 p-3 rounded-md text-left w-full'>
+//       <div className='text-lg font-semibold my-2'>{title}</div>
+//       <p>{shortDescription}</p>
+//     </button>
+//   );
+// };
 
 
-const API_URL = "http://localhost:8000";
-
-const LikeComponent1 = ({ title,userName,postId,compType }) => {
+const LikeComponent1 = ({ title,userName,postId }) => {
   // 1 = like , 2 = disLike , 3 = saved : for compType
   // const {userName, apply = false , postId} = req.body;
 
@@ -18,53 +166,53 @@ const LikeComponent1 = ({ title,userName,postId,compType }) => {
     const apply = false;
     const dispatch = useDispatch();
 
+    // <div className="flex text-2xl text-red-500">
+    //   <button onClick={handleDelete}><FaTrashAlt/></button>
+    // </div>
+
     const handleDelete = async () => {
       try {
         let response = null;
-        if(compType === 1){
-          response = await axios.patch(`${API_URL}/post/like`, { userName, postId, apply }, { withCredentials: true });
-          dispatch(removeLike({postId})); // removing postId from currentUser
-          dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID
-          
-        } else if(compType == 2){
-          response = await axios.patch(`${API_URL}/post/disLike` ,{ userName, postId, apply }, { withCredentials: true } )
-          dispatch(removeDisLike({postId})); // removing postId from currentUser
-          dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
-        } else if(compType == 3){
-          response = await axios.patch(`${API_URL}/post/saved` , { userName, postId, apply }, { withCredentials: true })
-          dispatch(removeSaved({postId})); // removing postId from currentUser
-        }
+
+        // if(compType === 1){
+        //   response = await axios.patch(`${API_URL}/post/like`, { userName, postId, apply }, { withCredentials: true });
+        //   dispatch(removeLike({postId})); // removing postId from currentUser
+        //   dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID          
+        // } else if(compType == 2){
+        //   response = await axios.patch(`${API_URL}/post/disLike` ,{ userName, postId, apply }, { withCredentials: true } )
+        //   dispatch(removeDisLike({postId})); // removing postId from currentUser
+        //   dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
+        // } else if(compType == 3){
+        //   response = await axios.patch(`${API_URL}/post/saved` , { userName, postId, apply }, { withCredentials: true })
+        //   dispatch(removeSaved({postId})); // removing postId from currentUser
+        // }
       } catch (error) {
         
       }
     }
-    const NavigatePost = (e) => {
-
+    const NavigatePost = () => {
     }
-    const NavigateProfile = (e) => {
-        
+    const NavigateProfile = () => {
     }
 
     return(
         <>
-        <div className={`${THEMES[theme].innerContainer} flex justify-between p-1  shadow-lg`}>
-            <button onClick={NavigatePost}>
-               <img src="src\assets\react.svg" alt="" className="w-40 h-40 bg-stone-900 rounded-lg"  />
+        <div className={`${THEMES[theme].innerContainer} flex justify-between p-1 gap-x-2 shadow-lg`}>
+            <button onClick={NavigatePost} className="flex-1">
+               <img src="src\assets\react.svg" alt="" className="w-full h-40 bg-stone-900 rounded-lg"  />
             </button>
-            <div className={`  flex flex-col justify-between py-6`}>
+            <div className={` flex flex-col justify-between py-6`}>
                 <button onClick={NavigatePost}>
-                   <h2 className="text-xl font-bold">Title/Component Name {title}</h2>
+                   <h2 className="text-xl font-bold">Component Name {title}</h2>
                 </button>
                 <button onClick={NavigateProfile}>
-                   <h2 className="text-lg font-semibold">userName: who has posted this {userName}</h2>
+                   <h2 className="text-lg font-semibold">userName: who has  {userName}</h2>
                 </button>
             </div>
-            <div className="flex text-2xl text-red-500">
-                <button onClick={handleDelete}><FaTrashAlt/></button>
-            </div>
+            
         </div>
-        
         </>
+
     )
 }
 
@@ -123,94 +271,140 @@ const LikeComponent2 = ({title,userName,postId,compType}) => {
     )
 }
 
-const CardComponent = ({postId,userName}) => {
-  let likeCnt = 50;
+const CardComponent = ({ postId, userName, html, css, js, react, title, description, likes }) => {
+
   const [fullView ,setFullView] = useState(false)
-  const [likes, setLikes] = useState(false);
-  const [disLikes, setDisLikes] = useState(false);
+  const [applyLike, setLikes] = useState(false);
+  const [applyDisLikes, setDisLikes] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  const description = "This is a sample description of the component which contains more than seven words to demonstrate the read more functionality.";
   const words = description.split(" ");
   const shortDescription = words.slice(0, 10).join("") + (words.length > 7 ? "..." : "");
 
-  let apply = null;
-  const dispatch = useDispatch();
+  const [updateLike ,{}] = useUpdateLikeMutation();
+  const [updateDislike ,{}] = useUpdateDislikeMutation();
+  const [updateSaved ,{}] = useUpdateSavedMutation();
 
   const HandleLike = async () => {
-    setLikes(!likes);
-    apply = likes;
-    
+    let apply = !applyLike;
+    setLikes(apply); 
     try {
-      await axios.patch(`${API_URL}/post/like` , { userName, postId, apply }, { withCredentials: true })
-      if(apply){
-        dispatch(addLike({postId}))
-      } else{
-        dispatch(removeLike({postId}))
-      }
-      dispatch(likePost({postId ,apply}))  // manage like count
-      if(disLikes){
-        setDisLikes(false);
+      await updateLike({ userName, postId, apply}).unwrap();
+  
+      if (applyDisLikes) {
         apply = false;
-        await axios.patch(`${API_URL}/post/disLike` , { userName, postId, apply }, { withCredentials: true })
-        dispatch(removeDisLike({postId})) // removing postId from currentUser
-        dispatch(dislikePost({postId ,apply}));// Decrementing the count of disLike on this postID
+        setDisLikes(false);
+        await updateDislike({ userName, postId, apply }).unwrap();
       }
     } catch (err) {
-      
+      // handle error
     }
-    setDisLikes(false);
-    
-  }
+  };
 
   const HandleDisLike = async () => {
-    setDisLikes(!disLikes);
-    apply = disLikes;
-    
+    let apply = !applyDisLikes;
+    setDisLikes(apply);
+  
     try {
-      await axios.patch(`${API_URL}/post/disLike` , { userName, postId, apply }, { withCredentials: true })
-      if(apply){
-        dispatch(addDisLike({postId}))
-      } else{
-        dispatch(removeDisLike({postId}))
-      }
-      dispatch(dislikePost({postId ,apply}));// manage dislike count
-      if(likes){
+      await updateDislike({ userName, postId, apply }).unwrap();
+  
+      if (applyLike) {
         setLikes(false);
-        apply = false;
-        await axios.patch(`${API_URL}/post/like` , { userName, postId, apply }, { withCredentials: true })
-        dispatch(removeLike({postId})); // removing postId from currentUser
-        dispatch(likePost({postId ,apply})); // Decrementing the count of like on this postID
+        await updateLike({ userName, postId, apply: false }).unwrap();
       }
     } catch (err) {
-      
+      console.error("Dislike error:", err);
     }
-    
-  }
+  };
 
   const HandleSave = async () => {
-    setSaved(!saved)
-    apply = saved;
+    const apply = !saved;
+    setSaved(apply);
+  
     try {
-      await axios.patch(`${API_URL}/post/save` , { userName, postId, apply }, { withCredentials: true })
-      if(apply){
-        dispatch(addSaved({postId}))
-      } else{
-        dispatch(removeSaved({postId}))
-      }
+      await updateSaved({ userName, postId, apply }).unwrap();
     } catch (err) {
-      
+      console.error("Save error:", err);
     }
+  };  
+  
+
+    // const dispatch = useDispatch();
+  // const HandleLike = async () => {
+  //   setLikes(!applyLike);
+
+  //   try {
+  //     await axios.patch(`${API_URL}/post/like` , { userName, postId, applyLike }, { withCredentials: true })
+  //     if(applyLike){
+  //       dispatch(addLike({postId}))
+  //     } else{
+  //       dispatch(removeLike({postId}))
+  //     }
+  //     dispatch(likePost({postId ,applyLike})) // manage like count
+  //     if(applyDisLikes){
+  //       setDisLikes(false);
+  //       await axios.patch(`${API_URL}/post/disLike` , { userName, postId, applyDisLikes }, { withCredentials: true })
+  //       dispatch(removeDisLike({postId})) // removing postId from currentUser
+  //       dispatch(dislikePost({postId ,applyDisLikes})); // Decrementing the count of disLike on this postID
+  //     }
+  //   } catch (err) {
+      
+  //   }
+  //   setDisLikes(false);
+    
+  // }
+
+  // const HandleDisLike = async () => {
+  //   setDisLikes(!applyDisLikes); 
+  //   try {
+  //     await axios.patch(`${API_URL}/post/disLike` , { userName, postId, applyDisLikes }, { withCredentials: true })
+  //     if(applyDisLikes){
+  //       dispatch(addDisLike({postId}))
+  //     } else{
+  //       dispatch(removeDisLike({postId}))
+  //     }
+  //     dispatch(dislikePost({postId ,applyDisLikes}));// manage dislike count
+  //     if(applyLike){
+  //       setLikes(false);
+  //       await axios.patch(`${API_URL}/post/like` , { userName, postId, applyLike }, { withCredentials: true })
+  //       dispatch(removeLike({postId})); // removing postId from currentUser
+  //       dispatch(likePost({postId ,applyLike})); // Decrementing the count of like on this postID
+  //     }
+  //   } catch (err) {
+      
+  //   }
+    
+  // }
+
+  // const HandleSave = async () => {
+  //   setSaved(!saved)
+ 
+  //   try {
+  //     await axios.patch(`${API_URL}/post/save` , { userName, postId, saved }, { withCredentials: true })
+  //     if(saved){
+  //       dispatch(addSaved({postId}))
+  //     } else{
+  //       dispatch(removeSaved({postId}))
+  //     }
+  //   } catch (err) {
+      
+  //   }
+  // }
+  const dispatch = useDispatch();
+
+  const VisitProfile = () => {
+    dispatch(UserApi.util.invalidateTags([{ type: 'UserPost' }, { type: 'OtherUserData' }]));
+    navigate('/other-user', { state: { userName } });
   }
 
   return (
     <div className=" mt-3 p-5 w-full mx-auto bg-gray-100 rounded-lg shadow-md">
       {/* User Info */}
-        <div className="  flex gap-x-6 text-lg font-bold">         
+        <button onClick={VisitProfile} className="w-full  flex gap-x-6 text-lg font-bold">         
           <img src="" alt="U" className="bg-red-500 w-10 h-10 text-white overflow-hidden rounded-full" />
-          <span className="text-amber-600 my-auto">User Name</span>
-        </div>
+          <span className="text-amber-600 my-auto">{userName}</span>
+        </button>
  
 
       {/* Action Buttons */}
@@ -230,12 +424,12 @@ const CardComponent = ({postId,userName}) => {
 
       {/* Title and Actions */}
       <div>
-        <div className ="my-2 font-bold text-lg">Component Name</div>
+        <div className ="my-2 font-bold text-lg">{title}</div>
         <div className={`flex gap-x-5`}>
           <div className={`bg-gray-300  flex gap-x-4 p-1 px-2 rounded-full`}>
-            <button className="block" onClick={HandleLike}><FaThumbsUp title="Like" className={`text-xl m-1    ${likes ? "text-rose-600" :""} `} /></button>
-            {likeCnt} |
-            <button className="block" onClick={HandleDisLike}><FaThumbsDown title="Dislike" className={`text-xl m-1  ${disLikes ? "text-rose-600" : ""} `} /></button>
+            <button className="block" onClick={HandleLike}><FaThumbsUp title="Like" className={`text-xl m-1    ${applyLike ? "text-rose-600" :""} `} /></button>
+            {likes} |
+            <button className="block" onClick={HandleDisLike}><FaThumbsDown title="Dislike" className={`text-xl m-1  ${applyDisLikes ? "text-rose-600" : ""} `} /></button>
           </div>
           <div className="bg-gray-300 px-3 pt-1 rounded-full">
             <button onClick={HandleSave}><FaSave className={`text-xl m-1  ${saved ? "text-rose-600" : "text-gray-900"}`} />
@@ -265,4 +459,9 @@ export{
     LikeComponent1,
     LikeComponent2,
     CardComponent,
+    LikeCard,
+    PostCard,
+    DisLikeCard,
+    SavedCard,
+    // OtherPostCard,
 }

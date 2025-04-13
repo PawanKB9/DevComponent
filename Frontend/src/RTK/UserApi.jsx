@@ -1,17 +1,40 @@
-import { postApi } from './PostApi';
+import { postApi } from './PostApi.jsx';
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const userApi = postApi.injectEndpoints({
+export const userApi = postApi.injectEndpoints({
     endpoints: (builder) => ({
+        uploadProfileImage: builder.mutation({
+            query: (formData) => ({
+              url: '/upload-profile',
+              method: 'POST',
+              body: formData,
+            }),
+          }),          
+        ResetPassword: builder.mutation({
+            query: ({oldPassword ,newPassword}) => ({
+                url:`/changePassword`,
+                method: 'POST',
+                body: {oldPassword ,newPassword},
+                credentials:'include',
+            }),
+        }),
+        forgotPassword: builder.mutation({
+            query: ({email , password}) => ({
+                url:`/forgotPassword`,
+                method:'POST',
+                body: {email ,password},
+            }),
+        }),
         loginUser: builder.mutation({
             query: ({userName,password}) => ({
                 url:`/login`,
                 method:'POST',
                 body: {userName,password},
             }),
+            invalidatesTags: ['curUser'],
         }),
         createNewUser: builder.mutation({
-            query: ({userData}) => ({
+            query: (userData) => ({
                 url:`/signup`,
                 method:'POST',
                 body: {userData},
@@ -41,10 +64,9 @@ const userApi = postApi.injectEndpoints({
             invalidatesTags: ['curUser'],
         }),
         getCurrentUser: builder.query({
-            query: ({userName}) => ({
+            query: () => ({
                 url:`/profile`,
                 credentials:'include',
-                params: {userName},
             }),
             providesTags: ['curUser'],
         }),
@@ -113,7 +135,7 @@ const userApi = postApi.injectEndpoints({
             invalidatesTags: ['likedPost'],
         }),
         getUserPost: builder.query({
-            query: (userName) => ({
+            query: ({userName}) => ({
                 url: '/myPost',  // post of any user by userName
                 method: 'GET',
                 params: { userName },
@@ -131,6 +153,9 @@ const userApi = postApi.injectEndpoints({
 });
 
 export const {
+    useUploadProfileImageMutation,
+    useResetPasswordMutation,
+    useForgotPasswordMutation,
     useLoginUserMutation,
     useCreateNewUserMutation,
     useUpdateCurrentUserMutation,
@@ -140,7 +165,48 @@ export const {
     useDeleteLikesMutation,
     useGetUserPostQuery,
     useGetOtherUserDataQuery,
+    usePrefetch,
 } = userApi;
+
+// const [trigger, { data, isFetching }] = useLazyGetUserDetailsQuery(); // or your endpoint name
+
+// const [hasFetched, setHasFetched] = useState(false);
+
+// const handleHover = () => {
+//   if (!hasFetched) {
+//     trigger(userId); // or whatever your param is
+//     setHasFetched(true);
+//   }
+// };
+
+// const [shouldFetch, setShouldFetch] = useState(false);
+
+// const { data, isFetching } = useGetUserQuery(userId, {
+//   skip: !shouldFetch,
+// });
+
+// const handleHover = () => {
+//   if (!shouldFetch) setShouldFetch(true);
+// };
+
+
+{/* <Link onMouseEnter={handleHover} to={`/user/${userId}`}>
+  View Profile
+</Link>
+
+
+
+const [loginUser, { data, error, isLoading }] = useLoginUserMutation();
+
+const handleLogin = async () => {
+  try {
+    const response = await loginUser({ email, password }).unwrap();
+    console.log('User data:', response);
+  } catch (err) {
+    console.error('Login error:', err);
+  }
+}; */}
+
 
 // export const userApi = createApi({
 //     reducerPath: "userApi",

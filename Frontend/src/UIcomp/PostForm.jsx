@@ -2,12 +2,14 @@ import React , { useState , useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom'
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
-import { useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 // import { createPost } from '../RTK/PostSlice.jsx'
-import axios from 'axios'
+import { useCreateNewPostMutation } from '../RTK/PostApi.jsx';
+import { selectGetCurrentUserResult } from '../RTK/Selectors.jsx'
+// import axios from 'axios'
 
 
-const API_URL = "http://localhost:8000";
+// const API_URL = "http://localhost:8000";
 
 // fetch user id if logedIN and no user data , if no logedIn first send 
 // user to logIN and after logIN take userName from userSlice.
@@ -25,54 +27,56 @@ const API_URL = "http://localhost:8000";
 // }
 
 const ReactCode = ({}) => {
-    
-    const {theme} = useTheme()
-    const navigate = useNavigate(); 
-    const dispatch = useDispatch();
 
-    const [titleName , setTitleName] = useState('')
-    const [description , setDescription] = useState('')
-    const [reactCode , setReactCode] = useState('')
+  const { theme } = useTheme();
+  // const navigate = useNavigate();
+  const userData = useSelector(selectGetCurrentUserResult) || null;
+  const userName = userData?.data?.userName || null;
 
-    const action = {
-      title:titleName,
-      description:description,
-      codeType:1,
-      react:reactCode,
-      likes:0,
-      disLikes:0,
-      user:userName,
+  // if(!userName){
+  //   navigate('/login-signup');
+  // }
+  
+  const [titleName, setTitleName] = useState('');
+  const [description, setDescription] = useState('');
+  const [reactCode, setReactCode] = useState('');
+  // const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
+  
+  const HandlePost = async (e) => {
+    e.preventDefault();
+  
+    if (!titleName || !reactCode) {
+      alert("Please fill all required fields!");
+      return;
     }
-    const HandlePost = async (e) => {
-      e.preventDefault();
-      if (!titleName || !reactCode) {
-        alert("Please fill all required fields!");
-        return;
-      }
-      try {
-        const respons = await axios.post(`${API_URL}/addpost` , action);
-        
-        // dispatch(createPost(respons));
-        setTitleName('')
-        setDescription('')
-        setReactCode('')
-      
-        
-      } catch (err) {
-        
-      }
-      navigate('/');
-      
+  
+    const postData = {
+      title: titleName,
+      description,
+      codeType: 1,
+      react: reactCode,
+      likes: 0,
+      disLikes: 0,
+      user: userName,
+    };
+  
+    try {
+      // await createNewPost({ userName, postData }).unwrap();
+      setTitleName('');
+      setDescription('');
+      setReactCode('');
+      // navigate('/');
+    } catch (err) {
+      console.error('Post creation failed:', err);
     }
-    
-
+  };
 
       return (
-        <div id="loginSignupForm" className={`${THEMES[theme].page2} min-h-screen`}>
+        <div id="loginSignupForm" >
         
           <div id="signUp" className="flex flex-col items-center justify-center">
-            <form action="#" className={` ${THEMES[theme].outerContainer} p-6 my-14 rounded-lg`}>
-              <label htmlFor="userid" className={`${THEMES[theme].labels} my-4 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
+            <form action="#" className={` ${THEMES[theme].outerContainer} px-6 py-2 rounded-lg`}>
+              <label htmlFor="userid" className={`${THEMES[theme].labels} my-2 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
                 Post Your Code
               </label> 
               <input type="text" id="name" name="name" value={titleName} onChange={(e)=>{setTitleName(e.target.value)}} placeholder="Component Name" required className={`${THEMES[theme].input1} capsuleInputBar`} />
@@ -92,102 +96,106 @@ const ReactCode = ({}) => {
       );
   };
 
-const NonReactCode = ({showCss}) => {
-    
-    const {theme} = useTheme()
-    const navigate = useNavigate(); 
-    const dispatch = useDispatch();
+const NonReactCode = ({ showCss }) => {
+  const { theme } = useTheme();
+  // const navigate = useNavigate();
+  // const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
+  const userData = useSelector(selectGetCurrentUserResult) || null;
+  const userName = userData?.data?.userName || null;
+  // if(!userName){
+  //   navigate('/login-signup');
+  // }
+  const [titleName, setTitleName] = useState('');
+  const [description, setDescription] = useState('');
+  const [htmlCode, setHtmlCode] = useState('');
+  const [cssCode, setCssCode] = useState('');
+  const [jsCode, setJsCode] = useState('');
 
-    const [titleName ,setTitleName] = useState('')
-    const [description , setDescription] = useState('')
-    const [htmlCode , setHtmlCode] = useState('')
-    const [cssCode , setCssCode] = useState('')
-    const [jsCode , setJsCode] = useState('')
-    let x=2;
-    if(!showCss){
-      x=3;
-    }
-    const action = {
-      title:titleName,
-      description:description,
-      codeType:x,
-      html:htmlCode,
-      css:cssCode,
-      js:jsCode,
-      likes:0,
-      disLikes:0,
-      user:userName,
-    }
+  const codeType = showCss ? 2 : 3;
 
-    const HandlePost = async (e) => {
-      e.preventDefault();
-      if (!titleName || !htmlCode) {
-        alert("Please fill all required fields!");
-        return;
-      }
-      try {
-        const respons = await axios.post(`${API_URL}/addpost` , action)
-        dispatch(createPost(action));
-        setTitleName('');
-        setDescription('');
-        setHtmlCode('');
-        setCssCode('');
-        setJsCode('');
-        x=0;
-
-      } catch (err) {
-        // error here
-      }
-      navigate('/');
-      
-    }
-      return (
-        <div id="loginSignupForm" className={`${THEMES[theme].page2} min-h-screen`}>
-          
-    
-           
-    
-          <div id="signUp" className="flex flex-col items-center justify-center">
-            <form action="#" className={` ${THEMES[theme].outerContainer} p-6 my-14 rounded-lg`}>
-            <label htmlFor="userid" className={`${THEMES[theme].labels} my-4 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
-                Post Your Code
-              </label>
-              <input type="text" id="compName" name="name" value={titleName} onChange={(e) => {setTitleName(e.target.value)}} placeholder="Component Name" required className={`${THEMES[theme].input1} capsuleInputBar`} />
-              <input type="text" id="Description" name="name" value={description} onChange={(e) => {setDescription(e.target.value)}} placeholder="Description about code..." required className={`${THEMES[theme].input2} capsuleInputBar`} />
-              <textarea placeholder="HTML code" value={htmlCode} onChange={(e) => {setHtmlCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
-              { showCss && 
-              <textarea placeholder="CSS code" value={cssCode} onChange={(e) => {setCssCode(e.target.value)}} className={`${THEMES[theme].input2} codeArea `}></textarea>}
-              <textarea placeholder="JS code" value={jsCode} onChange={(e) => {setJsCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
-
-              <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
-              Skip</button>
-              <button type="submit" onClick={HandlePost} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
-           
-            </form>
-          </div>
-          
-        </div>
-      );
+  const postData = {
+    title: titleName,
+    description,
+    codeType,
+    html: htmlCode,
+    css: cssCode,
+    js: jsCode,
+    likes: 0,
+    disLikes: 0,
+    user: userName,
   };
+
+  const HandlePost = async (e) => {
+    e.preventDefault();
+
+    if (!titleName || !htmlCode) {
+      alert("Please fill all required fields!");
+      return;
+    }
+
+    try {
+      // await createNewPost({ userName, postData }).unwrap();
+      setTitleName('');
+      setDescription('');
+      setHtmlCode('');
+      setCssCode('');
+      setJsCode('');
+      // navigate('/');
+    } catch (err) {
+      console.error('Post creation failed:', err);
+    }
+  };
+  
+    return (
+      <div id="loginSignupForm" >
+        
+  
+          
+  
+        <div id="signUp" className="flex flex-col items-center justify-center">
+          <form action="#" className={` ${THEMES[theme].outerContainer} px-6 py-2 rounded-lg`}>
+          <label htmlFor="userid" className={`${THEMES[theme].labels} my-2 block text-lg largePhone:text-xl tab:text-2xl font-bold`}>
+              Post Your Code
+            </label>
+            <input type="text" id="compName" name="name" value={titleName} onChange={(e) => {setTitleName(e.target.value)}} placeholder="Component Name" required className={`${THEMES[theme].input1} capsuleInputBar`} />
+            <input type="text" id="Description" name="name" value={description} onChange={(e) => {setDescription(e.target.value)}} placeholder="Description about code..." required className={`${THEMES[theme].input2} capsuleInputBar`} />
+            <textarea placeholder="HTML code" value={htmlCode} onChange={(e) => {setHtmlCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
+            { showCss && 
+            <textarea placeholder="CSS code" value={cssCode} onChange={(e) => {setCssCode(e.target.value)}} className={`${THEMES[theme].input2} codeArea `}></textarea>}
+            <textarea placeholder="JS code" value={jsCode} onChange={(e) => {setJsCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
+
+            <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
+            Skip</button>
+            <button type="submit" onClick={HandlePost} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
+          
+          </form>
+        </div>
+        
+      </div>
+    );
+};
 
 const PostForm = () => {
 
+  const {theme} = useTheme()
   const [lang , setLang] = useState(1);
         return (
           <div>
-            <select
-              name="themes"
-              id="ChangeTheme"
-              onChange={(e) => setLang(Number(e.target.value))}
-              value={lang}
-              className={`rectanglInputBar mx-auto `}>
-              <option value={1} >React</option>
-              <option value={2} >Non-React</option>
-              <option value={3}  >Non-React-Tailwind</option>
-            </select>
-            {lang === 1 && <ReactCode />}
-            {lang === 2 && <NonReactCode showCss={true} />}
-            {lang === 3 && <NonReactCode showCss={false} />}
+            <span className={` ${THEMES[theme].outerContainer} min-h-screen`}>
+              <select
+                name="themes"
+                id="ChangeTheme"
+                onChange={(e) => setLang(Number(e.target.value))}
+                value={lang}
+                className={`rectanglInputBar mx-auto `}>
+                <option value={1} >React</option>
+                <option value={2} >Non-React</option>
+                <option value={3}  >Non-React-Tailwind</option>
+              </select>
+              {lang === 1 && <ReactCode />}
+              {lang === 2 && <NonReactCode showCss={true} />}
+              {lang === 3 && <NonReactCode showCss={false} />}
+            </span>
           </div>
         )
    

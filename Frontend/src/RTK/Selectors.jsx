@@ -1,5 +1,5 @@
-import { userApi } from "./UserApi";
-import { postApi } from "./PostApi";
+import { userApi } from "./UserApi.jsx";
+import { postApi } from "./PostApi.jsx";
 
 // const currentUser = useSelector((state) => state.currentUser);
 
@@ -7,9 +7,10 @@ import { postApi } from "./PostApi";
 //     const user = state.user.users.find(user => user.userName === userName);
 //     return user;
 // };
-const selectFilterArray = (state) => state.appData.filterArray;
+// const selectFilterArray = (state) => state.appData.filterArray;
 
 // const filterArr = useSelector(selectFilterArray);
+
 
 // postApi selectors
 export const selectGetAllDisLikesResult = postApi.endpoints.getAllDisLikes.select();

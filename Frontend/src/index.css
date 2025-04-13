@@ -16,7 +16,7 @@
            mobilePhone:max-w-[700px] mobilePhone:text-xl rounded-full;
   }
   .rectanglInputBar {
-    @apply  block  mb-6 border largePhone:mb-8 text-lg w-[93vw] p-2 max-w-[430px] mobilePhone:w-[90vw] 
+    @apply  block  my-4 border largePhone:mb-8 text-lg w-[93vw] p-2 max-w-[430px] mobilePhone:w-[90vw] 
            mobilePhone:max-w-[700px] mobilePhone:text-xl rounded-lg;
   }
   .codeArea {

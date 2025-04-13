@@ -6,15 +6,15 @@ export const postApi = createApi({
     refetchOnReconnect: true,  // need listener in store
     baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" ,credentials: "include" }),
     endpoints: (builder) => ({
-        updateFilter: builder.mutation({
-            query: ({filterData}) => ({
-                url:`/addFilter`,
-                body: {filterData},
-                method: `PATCH`,
-                credentials: 'include',
-            }),
-            providesTags: ['Posts'],
-        }),
+        // updateFilter: builder.mutation({
+        //     query: ({filterData}) => ({
+        //         url:`/addFilter`,
+        //         body: {filterData},
+        //         method: `PATCH`,
+        //         credentials: 'include',
+        //     }),
+        //     providesTags: ['Posts'],
+        // }),
         getFilterPosts: builder.query({
             query: ({filter ,code ,page}) => ({
                 url:`/:filter?/:code?`,
@@ -32,9 +32,8 @@ export const postApi = createApi({
             invalidatesTags: ['Posts'],
         }),
         getMyPosts: builder.query({
-            query: ({ userName }) => ({
+            query: () => ({
                 url: `/myPost`,
-                params: { userName },
                 credentials: 'include',
             }),
             providesTags: ['Posts'],
@@ -157,24 +156,25 @@ export const postApi = createApi({
 });
 
 export const {
-    useLazyGetAllDisLikesQuery, // lazy api calling
+    useLazyGetAllDisLikesQuery,// lazy api calling
     useCreateNewPostMutation,
     useDeleteMyPostMutation,
-    useGetAllDisLikesQuery,
-    useGetAllLikesQuery,
-    useGetAllSavedQuery,
+    // useGetAllDisLikesQuery,
+    useLazyGetAllLikesQuery,
+    useLazyGetAllSavedQuery,
     useGetFilterPostsQuery,
-    useGetMyPostsQuery,
+    useLazyGetMyPostsQuery,
     useUpdateDislikeMutation,
     useUpdateLikeMutation,
     useUpdateSavedMutation,
+    usePrefetch,
 } = postApi;
 
 
-const fn = () => {
-    const [trigger, { data: lazyData, isLoading: isLazyLoading, error: lazyError, isError }] = useLazyGetAllDisLikesQuery();
-    const { data, isLoading, error } = useGetAllDisLikesQuery();
-}
+// const fn = () => {
+//     const [trigger, { data: lazyData, isLoading: isLazyLoading, error: lazyError, isError }] = useLazyGetAllDisLikesQuery();
+//     const { data, isLoading, error } = useGetAllDisLikesQuery();
+// }
 
        // getPosts: builder.query({
         //     query: ({ filter , page }) => ({

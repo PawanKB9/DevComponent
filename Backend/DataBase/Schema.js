@@ -33,6 +33,14 @@ const userSchema = new mongoose.Schema({
     selfDescription:{
         type:String,
     },
+    profileImg: {
+        type: String, // Cloudinary image URL
+        default: '',  // optional default
+      },
+      bgImg: {
+        type: String, // Background image URL
+        default: '',  // optional default
+      },
     likes:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"posts"

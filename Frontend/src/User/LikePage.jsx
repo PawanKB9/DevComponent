@@ -1,39 +1,47 @@
-import axios from "axios"
+// import axios from "axios"
 import React , { useState } from "react"
 import { FaTrashAlt } from "react-icons/fa"
 import { LikeComponent1 , LikeComponent2 } from '../UIcomp/Components.jsx'
-import { useDispatch } from "react-redux"
-
-
-const API_URL = "http://localhost:8000";
+import { useDispatch ,useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom";
+import {selectGetAllLikesResult ,selectGetCurrentUserResult} from '../RTK/Selectors.jsx';
+import {useDeleteLikesMutation} from '../RTK/UserApi.jsx';
+import {useLazyGetAllLikesQuery} from '../RTK/PostApi.jsx';
+// const API_URL = "http://localhost:8000";
 
 const Likes = () => {
-    const likeArr = null
-    const userName = null;
-    const dispatch = useDispatch();
+    const navigate = useNavigate()
+    const cachedLikes = useSelector(selectGetAllLikesResult);
+    const [trigger, { data: lazyData, isLoading: lazyLoading, error: lazyError }] = useLazyGetAllLikesQuery();
+    useEffect(() => {
+        if (!cachedLikes) {
+          trigger();
+        }
+      }, [cachedLikes, trigger]);
+      
+    const userData = useSelector(selectGetCurrentUserResult);
+    const userName = userData?.userName || null;
+    useEffect(() => {
+        if (!userName) {
+          navigate('/login-signup');
+        }
+      }, [userName, navigate]);
+    const likes = cachedLikes || lazyData;
+    
+    const [deleteLikes, { isError, error }] = useDeleteLikesMutation();
 
     const DeleteAll = async () => {
+        const likeArr = likes.map((post) => post.postId)
         try {
-            const response = await axios.delete(`${API_URL}/allLikes`, {
-            data: { userName, likeArr },
-            withCredentials: true });
-            if(response){
-                dispatch(addField({ likes: [] })); 
-            }
+            await deleteLikes({userName,likeArr}).unwrap();
         } catch (err) {
             
         }
     }
-
     const DeleteOne = async (postId) => {
         let likeArr = [postId];
         try {
-            const response = await axios.delete(`${API_URL}/allLikes`, {
-            data: { userName, likeArr },
-            withCredentials: true });
-           if(response){
-                dispatch(addField({ likes: [] })); 
-            }
+            await deleteLikes({userName,likeArr}).unwrap();
         } catch (err) {
             
         }
@@ -48,8 +56,19 @@ const Likes = () => {
                     <FaTrashAlt className="text-red-500" />
                 </button>
             </div>
-                <LikeComponent1/>
-                <LikeComponent2/>
+
+            <div className=" overflow-hidden flex flex-col gap-4">
+            {likes.map(({ title, userName, postId ,description }) => (
+            <div key={postId} className={`flex justify-between gap-x-2 p-1`}>
+                <LikeCard title={title} description={description} userName={userName} postId={postId} />
+                <button onClick={() => DeleteOne(postId)} className="text-xl mx-4 text-red-500">
+                <FaTrashAlt />
+                </button>
+             </div>
+            ))}
+
+            {/* <LikeComponent2/> */}
+            </div>
         </div>
     )
 }

@@ -1,13 +1,21 @@
 import React from "react";
+import { useLocation } from 'react-router-dom';
+import { useGetUserPostQuery, useGetOtherUserDataQuery } from '../RTK/UserApi.jsx';
 
-const OtherUserProfile = ({
-  userName,
-  fullName,
-  CollageName,
-  profileImg,
-  bgImg,
-  selfDescription,
-}) => {
+
+const OtherUserProfile = () => {
+
+  const { state } = useLocation();
+  const userName = state?.userName;
+
+  const { data: userInfo, isLoading: infoLoading } = useGetOtherUserDataQuery(userName);
+  const { fullName, collageName, profileImg, bgImg, selfDescription } = userInfo || {}
+  const { data: userPosts, isLoading: postsLoading } = useGetUserPostQuery({ userName });
+
+  if(infoLoading){
+    return <div>Loading...</div>
+  }
+
   return (
     <div id="linkedInProfile" className=" mx-auto p-2 largePhone:p-4 bg-amber-100">
      
@@ -35,25 +43,24 @@ const OtherUserProfile = ({
 
             {/* Profile Details */}
             <div className="mt-24 underline">
-                <h2 id="" className="text-lg font-semibold">{`Full Name`}</h2>
-                <p>{`Collage Name`}</p>
-                <p>{`Description...`}</p>
+                <h2 id="" className="text-lg font-semibold">{fullName}</h2>
+                <p>{collageName}</p>
+                <p>{selfDescription}</p>
             </div>
 
         </div>
 
 
         {/* User Uploads */}
-        <div id="userUploads" className="my-6 bg-fuchsia-200 gap-[2px] grid grid-cols-3 largePhone:grid-cols-4">
-          {
-            <img
-              key={`Id`}
-              src={`assets/ThreeCats.png`}
-              alt="User upload"
-              className="h-[30vw] rounded-md largePhone:w-[23vw] largePhone:h-[23vw] max-h-[205px] max-w-[205px] w-[30vw] border-2 border-blue-600 object-cover"
-            />
-          }
-        </div>
+        <div className={`grid grid-cols-3 tab:flex flex-wrap gap-x-4`}>
+            {
+            userPosts?.map(({title ,postId ,description ,userName}) => (
+              <div key={postId}>
+                <PostCard title={title} userName={userName} postId={postId} description={description} />
+              </div>
+            ))
+            }
+          </div>
 
     
     </div>

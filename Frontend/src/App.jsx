@@ -8,8 +8,13 @@ import Likes from './User/LikePage.jsx'
 import Saved from './User/SavedPage.jsx';
 import DisLikes from './User/DisLikePage.jsx';
 import PostView from './UIcomp/PostView.jsx';
-
-
+import {ChangePassword} from './UIcomp/UserForm.jsx'
+// import { LikeCard } from './UIcomp/Components.jsx';
+import { FaPen ,FaCamera ,FaSave } from "react-icons/fa";
+import Navbar from './UIcomp/Navigation.jsx';
+import { BrowserRouter as Router , Route , Routes    } from 'react-router-dom';
+import UserProfile from './User/Userprofile.jsx';
+import { PostForm } from './UIcomp/PostForm.jsx';
 
 import './App.css'
 
@@ -18,16 +23,21 @@ function App() {
 
   return (
     <>
+
       <ThemeProvider>
       <Provider store={store} >
          <AllRoute />
-         
+         {/* <UserProfile/> */}
         {/* <OtherUserProfile/> */}
          {/* <DisLikes/> */}
          {/* <Saved/> */}
          {/* <PostView/> */}
+         {/* <ChangePassword /> */}
+         {/* <Navbar/> */}
+         {/* <PostForm/> */}
       </Provider>
       </ThemeProvider>
+     
     </>
   )
 }

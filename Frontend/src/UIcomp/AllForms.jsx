@@ -1,16 +1,17 @@
 import React , { useState } from "react";
-import { LoginSignupForm , VerifyPassword , OtpVerification } from "./UserForm";
+import { LoginSignupForm , EmailPassword , OtpVerification ,ChangePassword } from "./UserForm";
 import {  ReactCode ,NonReactCode , PostForm } from "./PostForm";
 import { ActionProvider } from './Context'
 
     const allForms = [
       LoginSignupForm,
-      VerifyPassword,
-      OtpVerification,
+      EmailPassword,
+      // OtpVerification,
       PostForm,
       // CodingLanguage,
       ReactCode,
       NonReactCode,
+      
     ];
   
   

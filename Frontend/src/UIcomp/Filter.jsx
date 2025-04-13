@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useSelector } from 'react-redux';
-import { selectFilterArray } from '../RTK/Selectors.jsx';
+// import { useSelector } from 'react-redux';
+// import { selectFilterArray } from '../RTK/Selectors.jsx';
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
 
 const Filter = () => {
   // The filterArray is taken dynamically from the Redux store
-  const filterArray = useSelector(selectFilterArray);
-  
+  // const filterArray = useSelector(selectFilterArray);
+  const filterArray = ['All', 'Buton' ,'Card' ,'Hero' ,'Slider' ,'Dashboard' ,'Landing Page' ,'Input Field' , 'Glass Effect' ,'Menu Card' ,'Profile View' , 'Reel View' , 'ETC.']
   const { theme } = useTheme()
   return (
     <>

@@ -1,32 +1,75 @@
 import express from 'express'
 import { users , posts, appdata } from '../DataBase/Schema.js';
+import { sendPasswordUpdatedMail } from '../middlewares/SendMail.jsx';
 
 const app = express();
 const limit = 10;
 
-app.patch('/addFilter' ,async (req ,res) => {
+app.post('/changePassword' , async (req ,res) => {
     try {
-        const filterData = req.body.filterData || '';
-        let filterArr;
-        if (!filterData) {
-            const data = await appdata.findOne(); 
-            filterArr = data ? data.filterArr : [];
-        } else {
-            filterArr = await appdata.findOneAndUpdate(
-                {},
-                { $push: { filterArr: filterData } },
-                { upsert: true, new: true }
-            );
+        // first authenticate the user and extract userName from cookies
+        const { oldPassword ,newPassword , userName} = req.body;
+        const User = await users.findById(userName);
+        if (!User) {
+            return res.status(404).send('User not found');
         }
+        // match oldPassword with saved password      
+        if(oldPassword !== password){ // first decript password
+            return res.status(404).send('Icorrect Password');
+        }
+        const email = User.email;
+        await sendPasswordUpdatedMail(email, userName);
 
-        return res.status(200).send(filterArr);
+        // save new password in incripted form 
+        return res.status(200).send('password updated successfully');
+
     } catch (err) {
-        console.error(err);
-        return res.status(500).send("Internal server error");
+        console.log(err)
+        return res.status(500).send('Internal server error')
     }
-});
+})
+
+app.post('/forgotPassword' , async (req ,res) => {
+    try {
+        const { email ,password } = req.body;
+        const User = await users.findOne({email});
+        if (!User) {
+            return res.status(404).send('User not found');
+        }
+        await sendPasswordUpdatedMail(email, userName);
+
+        // save this password in increpted form
+        return res.status(200).send('password updated successfully');
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send('Internal server error')
+    }
+})
+
+// app.patch('/addFilter' ,async (req ,res) => {
+//     try {
+//         const filterData = req.body.filterData || '';
+//         let filterArr;
+//         if (!filterData) {
+//             const data = await appdata.findOne(); 
+//             filterArr = data ? data.filterArr : [];
+//         } else {
+//             filterArr = await appdata.findOneAndUpdate(
+//                 {},
+//                 { $push: { filterArr: filterData } },
+//                 { upsert: true, new: true }
+//             );
+//         }
+
+//         return res.status(200).send(filterArr);
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).send("Internal server error");
+//     }
+// });
 
 //Combined filter
+
 app.get('/:filter?/:code?', async (req, res) => {
     try {
         const filter = req.params.filter || "all";
@@ -417,6 +460,7 @@ app.get('/myPost', async (req, res) => {
                 description: "$description",
                 title: "$title",
                 userName: "$user",
+                likes:"$likes",
                 codeType: "$codeType",
                 html: { $ifNull: ["$html", ""] },
                 css: { $ifNull: ["$css", ""] },
