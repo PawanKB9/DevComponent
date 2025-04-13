@@ -58,31 +58,8 @@ const CodePreview = ({ html, css, js, reactCode }) => {
 
 const SeeCode = ({ html , css , js , reactCode} ) => {
   
-    //  html = `<button class="button">Click Me</button>`; 
-//      css = `.button {
-//             padding: 15px 30px;
-//             font-size: 18px;
-//             font-weight: bold;
-//             color: white;
-//             background: linear-gradient(135deg, #ff7eb3, #ff758c);
-//             border: none;
-//             border-radius: 30px;
-//             cursor: pointer;
-//             transition: all 0.3s ease;
-//             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-//         }
-
-//         .button:hover {
-//             transform: scale(1.1);
-//             box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
-//         }
-// `; 
-//     const js = ``; 
-
-//     const reactCode = ''; 
-  
   return (
-    <div className="editor-container p-6  text-white h-57 flex flex-col gap-4">
+    <div className="editor-container p-4  text-white  flex flex-col gap-4">
       {/* <h2 className="text-2xl font-bold text-center">Live Code Editor</h2> */}
       <CodePreview html={html} css={css} js={js} reactCode={reactCode} />
     </div>

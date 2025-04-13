@@ -156,6 +156,7 @@ const CardComponent = ({postId,userName}) => {
         }`);
   const [js, setJs] = useState(``);
   const [reactCode, setReactCode] = useState(``);
+  const [ show , setShow ] = useState(false); 
 
   const description = "This is a sample description of the component which contains more than seven words to demonstrate the read more functionality.";
   const words = description.split(" ");
@@ -238,90 +239,100 @@ const CardComponent = ({postId,userName}) => {
         <span className="text-amber-600 my-auto">User Name</span>
       </div>
 
-
+      <div className="flex justify-between pt-4">
+      <button onClick={() => setShow(false) } className="border w-[40%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+          Preview
+        </button>
+        <button onClick={() =>{ setShow(true)}} className="border w-[40%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+          Copy Code 
+        </button>
+      </div>
       {/* Boxes and Buttons */}
-      <div className="flex justify-around gap-2 pt-3 pb-3">
-      {/* Display conditionally based on the logic */}
-      {reactCode === "" && (html !== "" || css !== "" || js !== "") ? (
-        <>
-          {/* HTML Input */}
-          <div className="flex flex-col items-center w-[350px]">
-            <button onClick={() => navigator.clipboard.writeText(html)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
-              Copy HTML Code
-            </button>
-            <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <textarea
-                onChange={(e) => setHtml(e.target.value)}
-                value={html}
-                placeholder="No HTML Code Available"
-                className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
-              />
+      {
+        !show && <div className= "my-3 h-60 p-4 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
+        <CodeEditor html={html} css={css} js={js} reactCode={reactCode} />
+    </div>
+      }
+      {
+        show && <div className="flex justify-around gap-2 pt-3 pb-3">
+        {/* Display conditionally based on the logic */}
+        {reactCode === "" && (html !== "" || css !== "" || js !== "") ? (
+          <>
+            {/* HTML Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(html)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy HTML Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setHtml(e.target.value)}
+                  value={html}
+                  placeholder="No HTML Code Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
             </div>
-          </div>
-
-          {/* CSS Input */}
-          <div className="flex flex-col items-center w-[350px]">
-            <button onClick={() => navigator.clipboard.writeText(css)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
-              Copy CSS Code
-            </button>
-            <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <textarea
-                onChange={(e) => setCss(e.target.value)}
-                value={css}
-                placeholder="No CSS Code Available"
-                className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
-              />
+  
+            {/* CSS Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(css)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy CSS Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setCss(e.target.value)}
+                  value={css}
+                  placeholder="No CSS Code Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
             </div>
-          </div>
-
-          {/* JavaScript Input */}
-          <div className="flex flex-col items-center w-[350px]">
-            <button onClick={() => navigator.clipboard.writeText(js)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
-              Copy JavaScript Code
-            </button>
-            <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <textarea
-                onChange={(e) => setJs(e.target.value)}
-                value={js}
-                placeholder="No JavaScript is Available"
-                className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
-              />
+  
+            {/* JavaScript Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(js)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy JavaScript Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setJs(e.target.value)}
+                  value={js}
+                  placeholder="No JavaScript is Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
             </div>
-          </div>
-        </>
-      ) : (html === "" && css === "" && js === "") ? (
-        <>
-          {/* React Component Input */}
-          <div className="flex flex-col items-center w-[350px]">
-            <button onClick={() => navigator.clipboard.writeText(reactCode)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
-              Copy React Code
-            </button>
-            <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <textarea
-                onChange={(e) => setReactCode(e.target.value)}
-                value={reactCode}
-                placeholder="Enter React Component JSX"
-                className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
-              />
+          </>
+        ) : (html === "" && css === "" && js === "") ? (
+          <>
+            {/* React Component Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(reactCode)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
+                Copy React Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setReactCode(e.target.value)}
+                  value={reactCode}
+                  placeholder="Enter React Component JSX"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Display all inputs */}
-          <div className="flex flex-col items-center w-[350px]"> Wrong Code </div>
-        </>
-      )}
-     </div>
-
-
-
+          </>
+        ) : (
+          <>
+            {/* Display all inputs */}
+            <div className="flex flex-col items-center w-[350px]"> Wrong Code </div>
+          </>
+        )}
+       </div>
+      }
+      
 
       {/* Component Box */}
       {/* <button onClick={()=>{setFullView(!fullView)}} className="w-full" > */}
-        <div className= "my-3 h-60 p-4 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
-            <CodeEditor html={html} css={css} js={js} reactCode={reactCode} />
-        </div>
+        
       {/* </button> */}
 
       {/* Title and Actions */}
