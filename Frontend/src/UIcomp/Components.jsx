@@ -7,7 +7,7 @@ import axios from "axios";
 import { addDisLike, addLike, removeDisLike, removeLike, removeSaved } from "../RTK/CurrentUser.jsx";
 import { dislikePost, likePost } from "../RTK/PostSlice.jsx";
 import CodeEditor from "./CodeEditor.jsx";
-import SeeCode from "./SeeCode.jsx";
+// import SeeCode from "./SeeCode.jsx";
 
 
 const API_URL = "http://localhost:8000";
@@ -110,7 +110,7 @@ const LikeComponent2 = ({title,userName,postId,compType}) => {
                {/* <img src="" alt="" className="w-full h-40 rounded-lg" /> */}
                {/* <CodeEditor /> */}
                {/* here the component will be displayed with only few details  */}
-               <SeeCode />
+               {/* <SeeCode /> */}
             </button>
             <div className={` flex  justify-between gap-x-4 py-6`}>
                 <button onClick={NavigatePost}>

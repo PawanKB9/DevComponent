@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState , useEffect , useRef } from 'react';
+import { useEffect , useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 
@@ -55,7 +55,7 @@ const CodePreview = ({ html, css, js, reactCode }) => {
   );
 };
 
-const SeeCode = ({ html , css , js , reactCode} ) => {
+const CodeEditor = ({ html , css , js , reactCode} ) => {
   
   return (
     <div className="editor-container p-4 text-white  flex flex-col gap-4">
@@ -65,4 +65,4 @@ const SeeCode = ({ html , css , js , reactCode} ) => {
   ); 
 }; 
 
-export default SeeCode
+export default CodeEditor
