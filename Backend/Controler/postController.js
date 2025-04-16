@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { users } from "../models/user.js";
-import { posts } from "../models/post.js";
+import { users } from '../DataBase/Schema.js';
+import { posts } from '../DataBase/Schema.js'
 
-
+const limit = 10;
 // add post controller 
 export const addPost =  async(req ,res) => {
     try {
+        console.log('hlo')
         const {codeType ,title ,description ,html ,css ,js ,react} = req.body;
 
         if( !title || !codeType ){
@@ -313,4 +314,32 @@ export const filterPost = async (req , res) => {
     const filter = req.params.filter || "all";
     // agreegate the data : 1. on basus of most liked , "2. most viewed (not possible in our case)"
     // send the filtered data as res
+}
+
+// get all posts controller 
+export const getAllPosts = async ( req , res ) => {
+    try {        
+        const  userName  = req.id;
+        const allPost = await posts.aggregate([
+            { $match: { user: userName } },
+            { $project: {
+                _id: 0,
+                postId: "$_id",
+                description: "$description",
+                title: "$title",
+                userName: "$user",
+                likes:"$likes",
+                codeType: "$codeType",
+                html: { $ifNull: ["$html", ""] },
+                css: { $ifNull: ["$css", ""] },
+                js: { $ifNull: ["$js", ""] },
+                react: { $ifNull: ["$react", ""] },
+            }},
+        ]);
+
+        return res.status(200).send(allPost);
+        } 
+        catch (err) {
+            return res.status(500).send('Internal server error');
+        }
 }

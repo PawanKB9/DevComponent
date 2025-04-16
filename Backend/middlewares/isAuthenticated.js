@@ -22,7 +22,8 @@ import jwt from "jsonwebtoken"
         }
 
         // if everything is right then store the id of user into token 
-        req.id = decodeToken.userId; 
+        req.id = decodeToken.userName; 
+        // console.log(req.id); 
         next(); 
     } catch (error) {
         console.log(error);

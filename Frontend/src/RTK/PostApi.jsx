@@ -4,7 +4,7 @@ export const postApi = createApi({
     reducerPath: "postApi",
     refetchOnFocus: true, // need listener in store
     refetchOnReconnect: true,  // need listener in store
-    baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000" ,credentials: "include" }),
+    baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/pp/devcomp" ,credentials: "include" }),
     endpoints: (builder) => ({
         // updateFilter: builder.mutation({
         //     query: ({filterData}) => ({
@@ -33,14 +33,14 @@ export const postApi = createApi({
         }),
         getMyPosts: builder.query({
             query: () => ({
-                url: `/myPost`,
+                url: `/post/allposts`,
                 credentials: 'include',
             }),
-            providesTags: ['Posts'],
+            // providesTags: ['Posts'],
         }),
         deleteMyPost: builder.mutation({
             query: ({ postIdArr }) => ({
-                url: `/deletePost`,
+                url: `/post/deletePost`,
                 method: 'DELETE',
                 body: { postIdArr },
                 credentials: 'include',
@@ -65,21 +65,21 @@ export const postApi = createApi({
         }),
         getAllLikes: builder.query({
             query: () => ({
-                url: `/liked`, // geting all likes post 
+                url: `/post/liked`, // geting all likes post 
                 credentials: "include",
             }),
             providesTags: ['likedPost'],
         }),
         getAllDisLikes: builder.query({
             query: () => ({
-                url: `/disliked`,// geting all Dislikes post
+                url: `/post/disliked`,// geting all Dislikes post
                 credentials: "include",
             }),
             providesTags: ['disLikePost']
         }),
         getAllSaved: builder.query({
             query: () => ({
-                url: `/saved`, // geting all saved post
+                url: `/post/saved`, // geting all saved post
                 credentials: "include",
             }),
             providesTags: ['savedPost'],

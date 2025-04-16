@@ -27,7 +27,7 @@
     @apply  py-1 px-2 rounded ;
   }
   .glassyEffect{
-    @apply bg-white/20   backdrop-blur-sm border border-white/20 rounded-lg
+    @apply bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg
   }
   .scrollbar-hide {
     scrollbar-width: none; /* Firefox */

@@ -1,4 +1,4 @@
-import React , { useState  } from "react";
+import { useState  } from "react";
 import { FaThumbsUp, FaThumbsDown, FaSave, FaTrashAlt} from "react-icons/fa";
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useUpdateLikeMutation ,useUpdateSavedMutation ,useUpdateDislikeMutation } from '../RTK/PostApi.jsx'
 import {selectGetAllLikesResult ,selectGetAllDisLikesResult ,selectGetAllSavedResult ,selectGetMyPostsResult} from '../RTK/Selectors.jsx';
 // import {UserApi} from '../RTK/UserApi.jsx';
+import CodeEditor from "./CodeEditor.jsx";
 
 // const API_URL = "http://localhost:8000";
 
@@ -271,13 +272,18 @@ const LikeComponent2 = ({title,userName,postId,compType}) => {
     )
 }
 
-const CardComponent = ({ postId, userName, html, css, js, react, title, description, likes }) => {
+const CardComponent = ({ postId=``, userName=``, html=`<h1>hello</h1>`, css=``, js=``, react=``, title=``, description=``, likes=`` }) => {
 
-  const [fullView ,setFullView] = useState(false)
+  // const [fullView ,setFullView] = useState(false)
   const [applyLike, setLikes] = useState(false);
   const [applyDisLikes, setDisLikes] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [ show , setShow ] = useState(false);
+  let [htmlCode ,setHtml] = useState(html);
+  let [cssCode ,setCss] = useState(css);
+  let [jsCode ,setJs] = useState(js);
+  let [reactCode ,setReact] = useState(react);
 
   const words = description.split(" ");
   const shortDescription = words.slice(0, 10).join("") + (words.length > 7 ? "..." : "");
@@ -407,20 +413,95 @@ const CardComponent = ({ postId, userName, html, css, js, react, title, descript
         </button>
  
 
-      {/* Action Buttons */}
-      <div className="flex space-x-3 largePhone:gap-x-6 my-4 ">
-        <button className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded">Preview</button>
-        <button className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded">Copy Code</button>
-        <button className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded">Run</button>
+        <div className="flex justify-between pt-4">
+      <button onClick={() => setShow(false) } className="border w-[40%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+          Preview
+        </button>
+        <button onClick={() =>{ setShow(true)}} className="border w-[40%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+          Copy Code 
+        </button>
       </div>
-
-      {/* Component Box */}
-      <button onClick={()=>{setFullView(!fullView)}} className="w-full" >
-        <div className={`${fullView ? "h-[60vh]" : "h-70"} my-3 h-70 p-3 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg `}>
-          {}
-          the component will be rendered here ...
-        </div>
-      </button>
+      {/* Boxes and Buttons */}
+      {
+        !show && <div className= "my-3 p-4 border hover:border-red-500 border-amber-500 font-semibold text-lg text-center  rounded-lg ">
+        <CodeEditor htmlCode={htmlCode} cssCode={cssCode} jsCode={jsCode} reactCode={reactCode} />
+    </div>
+      }
+      {
+        show && <div className="flex justify-around gap-2 pt-3 pb-3">
+        {/* Display conditionally based on the logic */}
+        {reactCode === "" && (htmlCode !== "" || cssCode !== "" || jsCode !== "") ? (
+          <>
+            {/* HTML Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(htmlCode)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy HTML Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setHtml(e.target.value)}
+                  value={htmlCode}
+                  placeholder="No HTML Code Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
+            </div>
+  
+            {/* CSS Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(cssCode)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy CSS Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setCss(e.target.value)}
+                  value={cssCode}
+                  placeholder="No CSS Code Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
+            </div>
+  
+            {/* JavaScript Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(jsCode)} className="border w-[70%] focus:bg-gradient-to-r from-red-500 to-amber-500 py-1 rounded mb-2">
+                Copy JavaScript Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setJs(e.target.value)}
+                  value={jsCode}
+                  placeholder="No JavaScript is Available"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
+            </div>
+          </>
+        ) : (htmlCode === "" && cssCode === "" && jsCode === "") ? (
+          <>
+            {/* React Component Input */}
+            <div className="flex flex-col items-center w-[350px]">
+              <button onClick={() => navigator.clipboard.writeText(reactCode)} className="border w-full focus:bg-gradient-to-r from-red-500 to-amber-500 py-2 rounded mb-2">
+                Copy React Code
+              </button>
+              <div className="p-3 h-[300px] bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea
+                  onChange={(e) => setReact(e.target.value)}
+                  value={reactCode}
+                  placeholder="Enter React Component JSX"
+                  className="w-55 h-full bg-transparent border-none focus:outline-none overflow-auto scrollbar-hide"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Display all inputs */}
+            <div className="flex flex-col items-center w-[350px]"> Wrong Code </div>
+          </>
+        )}
+       </div>
+      }
 
       {/* Title and Actions */}
       <div>

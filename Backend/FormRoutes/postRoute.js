@@ -1,6 +1,6 @@
 import express from "express"; 
-import { addPost, dislikedPost, dislikePost, filterPost, likedPost, likePost, savedPost, savePost } from "../controllers/postController.js";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+import { addPost, dislikedPost, dislikePost, filterPost, getAllPosts, likedPost, likePost, savedPost, savePost } from '../Controler/postController.js'
+import isAuthenticated from '../middlewares/isAuthenticated.js'
 
 const router = express.Router(); 
 
@@ -14,12 +14,14 @@ router.route("/disliked").get(isAuthenticated,dislikedPost);
 router.route("/saved").get(isAuthenticated,savedPost);
 
 // filter post route 
-router.route("/:filter?").get(filterPost); 
+// router.route("/:filter?").get(filterPost); 
 
 
+// get current user posts route 
+router.route("/allposts").get(isAuthenticated ,getAllPosts);
 
 // add post route 
-router.route("/addpost").put(isAuthenticated,addPost); 
+router.route("/addpost").post(isAuthenticated,addPost); 
 
 // like route 
 router.route("/like").put(isAuthenticated,likePost)

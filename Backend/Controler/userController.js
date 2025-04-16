@@ -1,7 +1,8 @@
-import { users } from "../models/user.js";
+import { users } from '../DataBase/Schema.js'
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
+const limit = 10;
 // Register controller
 export const register = async( req , res ) =>{
     try {
@@ -39,8 +40,10 @@ export const register = async( req , res ) =>{
 
 // Login controller 
 export const login = async ( req , res ) =>{
+    
     try {
-        const {_id , password } = req.body; 
+        const {userName , password } = req.body;
+        const _id = userName;   
 
         if( !_id || !password ){
             res.status(400).json({
@@ -69,7 +72,7 @@ export const login = async ( req , res ) =>{
         }
 
         // we will store the userId in the form of abject inside the token 
-        const tokenData = { userId : user._id }; 
+        const tokenData = { userName : user._id }; 
 
         // now as all the details are correct , so generating the TOKEN
         const token = jwt.sign( tokenData , process.env.SECRET_KEY , {expiresIn :'1d'} ); 
@@ -77,7 +80,7 @@ export const login = async ( req , res ) =>{
 
         // now adding the details of the user in user variable 
         const newUser = {
-            _id:user._id, 
+            userName:user._id, 
             fullName:user.fullName,
             collegeName:user.collegeName, 
             email:user.email,  
@@ -115,7 +118,9 @@ export const seeProfile = async (req ,res) =>{
     // find user details by id from "User" then 
     // find all posts by userId from "Post"
     try {
-        const { _id } = req.body;
+        const userName = req.id;
+        const _id = userName; 
+
         if(!_id){
             return res.status(400).send('Id not found')
         }
@@ -123,7 +128,15 @@ export const seeProfile = async (req ,res) =>{
         if (!User) {
             return res.status(404).send('User not found');
         }
-        return res.status(200).send(User); 
+
+        const newUser =  {
+            userName:User._id, 
+            fullName:User.fullName,
+            collegeName:User.collegeName, 
+            email:User.email,  
+            selfDescription:User.selfDescription,
+        }
+        return res.status(200).send(newUser);
     } 
     catch (err) {
         console.log(err)
@@ -153,6 +166,57 @@ export const updateProfile =  async(req, res) => {
 
     } 
     catch (err) {
+        console.log(err)
+        return res.status(500).send('Internal server error')
+    }
+}
+
+// change password controller
+export const changePassword = async( req , res ) =>{
+    try {
+        const { oldPassword ,newPassword , userName} = req.body;
+        const User = await users.findById(userName);
+        if (!User) {
+            return res.status(404).send('User not found');
+        }
+
+        // match oldPassword with saved password      
+        const correctPass = await bcrypt.compare( oldPassword , User.password); 
+        if( correctPass != true ){ 
+            return res.status(404).send('Incorrect Password');
+        }
+        // save new password in incripted form
+        const bcryptedPass = await bcrypt.hash( newPassword, 10);
+        users.updateOne({_id : userName} ,{$set: { password: bcryptedPass }}); 
+        
+        const email = User.email;
+        await sendPasswordUpdatedMail(email, userName);
+
+        // save new password in incripted form 
+        return res.status(200).send('password updated successfully');
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send('Internal server error')
+    }
+}
+
+// forgot password controller 
+export const forgotPassword = async ( req , res ) =>{
+    try {
+        const { email ,password } = req.body;
+        const User = await users.findOne({email});
+        if (!User) {
+            return res.status(404).send('User not found');
+        }
+        // save this password in increpted form
+       const bcryptedPass = await bcrypt.hash( password , 10 ); 
+        users.updateOne({_id : User.userName} ,{$set: { password: bcryptedPass }});
+
+        await sendPasswordUpdatedMail(email, userName);
+
+        return res.status(200).send('password updated successfully');
+    } catch (err) {
         console.log(err)
         return res.status(500).send('Internal server error')
     }

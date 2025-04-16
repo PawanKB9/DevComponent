@@ -15,6 +15,7 @@ import Navbar from './UIcomp/Navigation.jsx';
 import { BrowserRouter as Router , Route , Routes    } from 'react-router-dom';
 import UserProfile from './User/Userprofile.jsx';
 import { PostForm } from './UIcomp/PostForm.jsx';
+import { CardComponent } from './UIcomp/Components.jsx';
 
 import './App.css'
 
@@ -23,7 +24,7 @@ function App() {
 
   return (
     <>
-
+      {/* <Router> */}
       <ThemeProvider>
       <Provider store={store} >
          <AllRoute />
@@ -35,9 +36,10 @@ function App() {
          {/* <ChangePassword /> */}
          {/* <Navbar/> */}
          {/* <PostForm/> */}
+         {/* <CardComponent/> */}
       </Provider>
       </ThemeProvider>
-     
+      {/* </Router> */}
     </>
   )
 }

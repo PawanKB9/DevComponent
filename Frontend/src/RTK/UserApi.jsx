@@ -1,7 +1,10 @@
 import { postApi } from './PostApi.jsx';
+
+
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const userApi = postApi.injectEndpoints({
+    reducerPath: 'userApi',
     endpoints: (builder) => ({
         uploadProfileImage: builder.mutation({
             query: (formData) => ({
@@ -160,6 +163,7 @@ export const {
     useCreateNewUserMutation,
     useUpdateCurrentUserMutation,
     useGetCurrentUserQuery,
+    useLazyGetCurrentUserQuery,
     useDeleteSavedMutation,
     useDeleteDislikesMutation,
     useDeleteLikesMutation,

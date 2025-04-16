@@ -1,24 +1,24 @@
 import mongoose from "mongoose";
 
-const appSchema = new mongoose.Schema({
-    filterArr: {
-        type: [String],
-        default: []
-    },
-});
+// const appSchema = new mongoose.Schema({
+//     filterArr: {
+//         type: [String],
+//         default: []
+//     },
+// });
 
 
-// _id:{
-//     type:String,
-//     required:true,
-//     unique:true
-// },
 const userSchema = new mongoose.Schema({
+    _id:{
+        type:String,
+        required:true,
+        unique:true
+    },
     fullName:{
         type:String,
         required:true
     },
-    collageName:{
+    collegeName:{
         type:String,
     },
     password:{
@@ -91,7 +91,7 @@ const postSchema = new mongoose.Schema({
         default:0,
     },
     user:{
-        type: mongoose.Schema.Types.ObjectId,
+        type:String,
         ref:"users"
     }
 
@@ -99,10 +99,10 @@ const postSchema = new mongoose.Schema({
 
 const users = mongoose.model('users' , userSchema);
 const posts = mongoose.model('posts' , postSchema);
-const appdata = mongoose.model('appdata' , appSchema)
+// const appdata = mongoose.model('appdata' , appSchema)
 
 export{
     users,
     posts,
-    appdata,
+    // appdata,
 }

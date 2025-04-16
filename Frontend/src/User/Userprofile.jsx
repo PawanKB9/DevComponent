@@ -4,18 +4,23 @@ import { selectGetCurrentUserResult , selectGetMyPostsResult } from '../RTK/Sele
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PostCard } from '../UIcomp/Components.jsx';
-import {useDeleteMyPostMutation} from '../RTK/PostApi.jsx'
+import {useDeleteMyPostMutation, useLazyGetMyPostsQuery} from '../RTK/PostApi.jsx'
 import {useUpdateCurrentUserMutation ,useUploadProfileImageMutation} from '../RTK/UserApi.jsx'
+import { userApi } from "../RTK/UserApi.jsx";
+
 
 const UserProfile = () => {
-  
-  const userData = useSelector(selectGetCurrentUserResult);
-  const userName = userData.userName
-  const fullName = userData.fullName
-  const collegeName = userData.collageName
+
+  const userData = useSelector((state) =>
+    selectGetCurrentUserResult(state)?.data
+  ) || null;
+  console.log(userData);
+  const userName = userData?.userName
+  const fullName = userData?.fullName
+  const collegeName = userData?.collageName
   // const profileImg = userData.profileImg
   // const bgImg = userData.bgImg
-  const selfDescription = userData.selfDescription
+  const selfDescription = userData?.selfDescription
 
   const [isEditble , setIsEditble] = useState(false);
   const [name ,setName] = useState(fullName)
@@ -23,12 +28,13 @@ const UserProfile = () => {
   const [description ,setDescription] = useState(selfDescription)
 
   const navigate = useNavigate();
-  useEffect(() => {
-    if(!userName){
-      navigate('/login-signup')
-    }
-  } ,[navigate])
-const allPosts = useSelector(selectGetMyPostsResult);
+  // useEffect(() => {
+  //   if(!userName){
+  //     // navigate('/login-signup')
+  //   }
+  // } ,[navigate])
+// const allPosts = useSelector(selectGetMyPostsResult);
+const allPosts = null;
 const [trigger ,{data ,isError:hi ,error:hlo}] = useLazyGetMyPostsQuery();
 
 useEffect(() => {
@@ -75,8 +81,8 @@ useEffect(() => {
     }
   };
   
-  const [bgImg, setBgImg] = useState(userData.bgImg || null);
-  const [profileImg, setProfileImg] = useState(userData.profileImg || null);
+  const [bgImg, setBgImg] = useState(userData?.bgImg || null);
+  const [profileImg, setProfileImg] = useState(userData?.profileImg || null);
 
   const [uploadProfileImage] = useUploadProfileImageMutation();
 
@@ -163,7 +169,7 @@ useEffect(() => {
               
             </button>
             {/* Profile Details */}
-            <input type="text" readOnly name="userName" value={userData.userName} className={`text-lg font-bold focus:outline-none`} id="" />
+            <input type="text" readOnly name="userName" value={userData?.userName} className={`text-lg font-bold focus:outline-none`} id="" />
             <input type="text" onChange={(e) => {setName(e.target.value)}} readOnly={!isEditble} name="fullName" value={name} className="focus:outline-none" id="" />
             <input type="text" onChange={(e) => {setCollege(e.target.value)}} readOnly={!isEditble} name="collegeName" value={college} className="focus:outline-none" id="" />
             <input type="text" onChange={(e) => {setDescription(e.target.value)}} readOnly={!isEditble} name="Description" value={description} className="focus:outline-none" id="" />

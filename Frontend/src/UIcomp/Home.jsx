@@ -18,7 +18,7 @@ const Home = () => {
     const isTab = useMediaQuery({ minWidth: 992 });
     const [yes , setYes] = useState(true);
     const [Item , setItem] = useState(false);
-    const filterArray = ['all', 'Buton' ,'Card' ,'Hero' ,'Slider' ,'Dashboard' ,'Landing Page' ,'Input Field' , 'Glass Effect' ,'Menu Card' ,'Profile View' , 'Reel View' , 'ETC.']
+    const filterArray = ['Navbar','Footer', 'Sidebar', 'Search Bar', 'Forms', 'Buttons', 'About Us', 'Cards', 'Sliders', 'Popover', 'Radio Buttons', 'Ratings', 'Loader', 'Spinner', 'Tags', 'Dashboard', 'Accordion', 'Timer', 'Dropdown', 'Table', 'List', 'Toast', 'Grid']
     useEffect(() => {       
         setYes(!isTab);
       }, [isTab]);
@@ -29,8 +29,10 @@ const Home = () => {
       const [code, setCode] = useState(null);
       const loaderRef = useRef();
     
-      const { data, isFetching } = useGetFilterPostsQuery({ filter, code, page });
-    
+      // const { data, isFetching } = useGetFilterPostsQuery({ filter, code, page });
+ 
+const data = null;
+const isFetching = null;
       // Append or reset posts when new data comes
       useEffect(() => {
         if (page === 1) {
@@ -109,7 +111,7 @@ const Home = () => {
                         </div>
                     )}
 
-            <div className="my-6 flex flex-col tab:ml-[180px]  tab: gap-y-6 tab:w-[calc(100vw-220px)] ">
+            <div className="flex flex-col tab:ml-[180px]  tab: gap-y-6 tab:w-[calc(100vw-220px)] ">
                 {/*Cards goes here */}
               {
                 allPosts?.map((post) => (
@@ -119,10 +121,6 @@ const Home = () => {
                 ))
               }
                 {/* <CardComponent/> */}
-                {/* <LikeComponent2/>
-                <LikeComponent1/>
-                <LikeComponent2/>
-                <LikeComponent2/> */}
                 
             </div>
           </div>

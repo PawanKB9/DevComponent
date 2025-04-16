@@ -3,7 +3,10 @@ import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
 import { postApi  } from '../RTK/PostApi.jsx';
 import { userApi  } from "../RTK/UserApi.jsx";
-import { useGetCurrentUserQuery } from '../RTK/UserApi.jsx'
+import { useGetCurrentUserQuery ,useLazyGetCurrentUserQuery } from '../RTK/UserApi.jsx'
+import {selectGetCurrentUserResult, selectLoginUserResult} from '../RTK/Selectors.jsx'
+import { useSelector } from "react-redux";
+import { useState } from "react";
 
 export const ChangeTheme = () => {
    
@@ -24,9 +27,28 @@ export const ChangeTheme = () => {
 }
 
 const Navbar = ({show}) => {
-    const { data, isLoading, isError, error } = useGetCurrentUserQuery();
-    const userName = data?.userName || null;
+    const { data:lazyData, isLoading, isError, error } = useGetCurrentUserQuery();
+    // const [trigger ,{data:lazyData}] = useLazyGetCurrentUserQuery();
+    const currentUser = useSelector((state) =>
+      selectGetCurrentUserResult(state)?.data
+    );
+    
+
+    console.log(currentUser);
+    // if(!userData){
+    //   trigger();
+    // }
+    // const [a,b] =useState(true)
+    // if(a){
+    //   b(false);
+    //   trigger()
+    // }
+    
+    
+    const userName = lazyData?.userName ||  null;
+    // console.log(userName)
     const navigate = useNavigate();
+    
 
     const prefetchMyPosts = postApi.usePrefetch('getMyPosts', {
         force: false,
@@ -41,16 +63,16 @@ const Navbar = ({show}) => {
         force: false,
     });
 
+    const myProfile = () => {
+      if (userName) {
+        navigate("/profile");
+      } else {
+        navigate("/profile");
+      }
+    }
     const addPost = () => {
         if (userName) {
           navigate("/add-post");
-        } else {
-          navigate("/login-signup");
-        }
-      }
-    const myProfile = () => {
-        if (userName) {
-          navigate("/profile");
         } else {
           navigate("/login-signup");
         }
@@ -80,21 +102,19 @@ const Navbar = ({show}) => {
     const {theme} = useTheme()
 
     return (        
-        <div className={`${show} w-[160px] mt-33 fixed lg:flex text-lg font-semibold flex flex-col gap-2`}>
-            <Link className={`nav ${THEMES[theme].bar} text-center `} to="/">Home</Link>
-            <Link className={`nav ${THEMES[theme].bar} text-center`} to="/login-signup">LogIn/SignUp</Link>
-            <button className={`nav ${THEMES[theme].bar} `} onClick={addPost}>Add Post</button>
-            <button onMouseEnter={() => prefetchMyPosts()} className={`nav ${THEMES[theme].bar} text-center`} onClick={myProfile} >My Profile</button>
+        <div className={`${show} w-[160px] mt-33 ml-1 fixed lg:flex text-lg font-semibold flex flex-col gap-2`}>
+            <Link className={`nav ${THEMES[theme].bar}  `} to="/">Home</Link>
+            <Link className={`nav ${THEMES[theme].bar} `} to="/login-signup">LogIn/SignUp</Link>
+            <button className={`nav ${THEMES[theme].bar} text-left` } onClick={addPost}>Add Post</button>
+            <button onMouseEnter={() => prefetchMyPosts()} className={`nav ${THEMES[theme].bar} text-left`} onClick={myProfile} >My Profile</button>
             <div className={`nav ${THEMES[theme].bar} `} > <ChangeTheme/></div>          
-            <button className={`nav ${THEMES[theme].bar} `} onClick={mySaved} onMouseEnter={() => prefetchMySaved()} >Saved</button>
-            <button className={`nav ${THEMES[theme].bar} `} onClick={myLikes} onMouseEnter={() => prefetchMyLikes()} >Likes</button>
-            <button  className={`nav ${THEMES[theme].bar} `} onClick={myDisLikes} onMouseEnter={() => prefetchMyDisLikes()} >Dislikes</button>
-            <Link className={`nav ${THEMES[theme].bar} text-center`} to="/change-password">Change Password</Link>
-            <Link className={`nav ${THEMES[theme].bar} text-center`} to="/AboutUs">About Us</Link>
+            <button className={`nav ${THEMES[theme].bar} text-left`} onClick={mySaved} onMouseEnter={() => prefetchMySaved()} >Saved</button>
+            <button className={`nav ${THEMES[theme].bar} text-left`} onClick={myLikes} onMouseEnter={() => prefetchMyLikes()} >Likes</button>
+            <button  className={`nav ${THEMES[theme].bar} text-left `} onClick={myDisLikes} onMouseEnter={() => prefetchMyDisLikes()} >Dislikes</button>
+            <Link className={`nav ${THEMES[theme].bar} text-md`} to="/change-password">ChangePassword</Link>
+            <Link className={`nav ${THEMES[theme].bar}  `} to="/AboutUs">About Us</Link>
         </div> 
     );
 };
 
 export default Navbar;
-
-
