@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from 'react-router-dom';
 import { useGetUserPostQuery, useGetOtherUserDataQuery } from '../RTK/UserApi.jsx';
+import { PostCard } from "../UIcomp/Components.jsx";
 
 
 const OtherUserProfile = () => {
@@ -9,10 +10,10 @@ const OtherUserProfile = () => {
   const userName = state?.userName;
 
   const { data: userInfo, isLoading: infoLoading } = useGetOtherUserDataQuery(userName);
-  const { fullName, collageName, profileImg, bgImg, selfDescription } = userInfo || {}
-  const { data: userPosts, isLoading: postsLoading } = useGetUserPostQuery({ userName });
+  const { fullName, collegeName, profileImg, bgImg, selfDescription } = userInfo || {}
+  const { data: userPosts, isLoading, postsLoading } = useGetUserPostQuery( userName );
 
-  if(infoLoading){
+  if(isLoading){
     return <div>Loading...</div>
   }
 
@@ -44,7 +45,7 @@ const OtherUserProfile = () => {
             {/* Profile Details */}
             <div className="mt-24 underline">
                 <h2 id="" className="text-lg font-semibold">{fullName}</h2>
-                <p>{collageName}</p>
+                <p>{collegeName}</p>
                 <p>{selfDescription}</p>
             </div>
 

@@ -36,6 +36,10 @@ const LoginSignupForm = ({navigate}) => {
     
     const handleSignUp = (e) => {
         e.preventDefault();
+        if(!userName || !fullName){
+          alert("Please fill all required fields!");
+          return;
+        }
         setAction(prv => ({
           ...prv,
           userName ,fullName ,collegeName ,selfDescription
@@ -104,6 +108,10 @@ const EmailPassword = () => {
       const [createNewUser, { isError, error } ] = useCreateNewUserMutation();
       const validateInput = async (e) => {
         e.preventDefault();
+        if(!email || !password){
+          alert("Please fill all required fields!");
+          return;
+        }
         const userData = {
           ...action, 
           email,
@@ -111,6 +119,8 @@ const EmailPassword = () => {
         };         
         try {
           await createNewUser( userData ).unwrap();
+          setEmail('')
+          setPassword('');
           move('/');
         } catch (err) {
           console.log(err)
@@ -152,14 +162,16 @@ const ForgotPassword = () => {
       const {theme} = useTheme()
       const [email , setEmail] = useState('');
       const [password , setPassword] = useState('')
+      const navigate = useNavigate(); 
 
       const [forgotPassword] = useForgotPasswordMutation();
       const forgotPass = async (e) => {
         e.preventDefault();
         try {
           await forgotPassword({ email, password }).unwrap();
+          navigate('/'); 
         } catch (err) {
-          
+          console.log(err); 
         }
       }
 
@@ -257,13 +269,16 @@ const ChangePassword = () => {
   const [oldPassword , setOldPassword] = useState('')
   const [newPassword , setNewPassword] = useState('')
   const [resetPassword] = useResetPasswordMutation();
+  const navigate = useNavigate(); 
 
   const HandlePassword = async (e) => {
     e.preventDefault();
     try {
       await resetPassword({ oldPassword, newPassword }).unwrap();
+      navigate('/'); 
+
     } catch (err) {
-      
+      console.log(err);
     }
   };
 

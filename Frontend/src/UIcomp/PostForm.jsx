@@ -1,7 +1,7 @@
 import React , { useState , useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom'
 import THEMES from "./Theme.jsx";
-import useTheme from "./Context.jsx"
+import useTheme from "./Context.jsx";
 import { useSelector} from "react-redux";
 // import { createPost } from '../RTK/PostSlice.jsx'
 import { useCreateNewPostMutation } from '../RTK/PostApi.jsx';
@@ -29,18 +29,14 @@ import { selectGetCurrentUserResult } from '../RTK/Selectors.jsx'
 const ReactCode = ({}) => {
 
   const { theme } = useTheme();
-  // const navigate = useNavigate();
+  const move = useNavigate();
   const userData = useSelector(selectGetCurrentUserResult) || null;
   const userName = userData?.data?.userName || null;
-
-  // if(!userName){
-  //   navigate('/login-signup');
-  // }
   
   const [titleName, setTitleName] = useState('');
   const [description, setDescription] = useState('');
   const [reactCode, setReactCode] = useState('');
-  // const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
+  const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
   
   const HandlePost = async (e) => {
     e.preventDefault();
@@ -61,11 +57,11 @@ const ReactCode = ({}) => {
     };
   
     try {
-      // await createNewPost({ userName, postData }).unwrap();
+      await createNewPost({postData }).unwrap();
       setTitleName('');
       setDescription('');
       setReactCode('');
-      // navigate('/');
+      move("/");
     } catch (err) {
       console.error('Post creation failed:', err);
     }
@@ -83,12 +79,10 @@ const ReactCode = ({}) => {
               <input type="text" id="name" name="name" value={description} onChange={(e) => {setDescription(e.target.value)}} placeholder="Description about code..." required className={`${THEMES[theme].input2} capsuleInputBar`} />
               <textarea placeholder="Your code goes here..." value={reactCode} onChange={(e) => {setReactCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
               <div className="flex flex-col">
-                <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
+                <button type="button" onClick={() => move("/")} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
                 Skip</button>
                 <button type='submit' onClick={HandlePost} className={`${THEMES[theme].buttons} cursor-pointer w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
               </div>
-              {/* <input 
-                type="submit"onClick={HandlePost} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}value="Post" /> */}
             </form>
           </div>
           
@@ -98,13 +92,11 @@ const ReactCode = ({}) => {
 
 const NonReactCode = ({ showCss }) => {
   const { theme } = useTheme();
-  // const navigate = useNavigate();
-  // const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
+  const move = useNavigate();
+  const [createNewPost, { isLoading, isError, error }] = useCreateNewPostMutation();
   const userData = useSelector(selectGetCurrentUserResult) || null;
   const userName = userData?.data?.userName || null;
-  // if(!userName){
-  //   navigate('/login-signup');
-  // }
+
   const [titleName, setTitleName] = useState('');
   const [description, setDescription] = useState('');
   const [htmlCode, setHtmlCode] = useState('');
@@ -132,15 +124,15 @@ const NonReactCode = ({ showCss }) => {
       alert("Please fill all required fields!");
       return;
     }
-
+    
     try {
-      // await createNewPost({ userName, postData }).unwrap();
+      const result = await createNewPost({ postData }).unwrap();
       setTitleName('');
       setDescription('');
       setHtmlCode('');
       setCssCode('');
       setJsCode('');
-      // navigate('/');
+      move("/");
     } catch (err) {
       console.error('Post creation failed:', err);
     }
@@ -164,7 +156,7 @@ const NonReactCode = ({ showCss }) => {
             <textarea placeholder="CSS code" value={cssCode} onChange={(e) => {setCssCode(e.target.value)}} className={`${THEMES[theme].input2} codeArea `}></textarea>}
             <textarea placeholder="JS code" value={jsCode} onChange={(e) => {setJsCode(e.target.value)}} className={`${THEMES[theme].input1} codeArea `}></textarea>
 
-            <button type="button" onClick={() => navigate("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
+            <button type="button" onClick={() => move("/")} className={`${THEMES[theme].buttons} w-[50vw] cursor-pointer my-4 mt-6 max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>
             Skip</button>
             <button type="submit" onClick={HandlePost} className={`${THEMES[theme].buttons} w-[50vw] max-w-[425px] mx-auto block rounded-full p-[4px] font-semibold mobilePhone:text-lg largeTab:text-2xl`}>Post</button>
           

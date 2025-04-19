@@ -92,7 +92,7 @@ const postSchema = new mongoose.Schema({
     },
     user:{
         type:String,
-        ref:"users"
+        // ref:"users"
     }
 
 })

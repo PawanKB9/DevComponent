@@ -29,7 +29,7 @@ export default function useTheme() {
     const [action ,setAction] = useState({
           fullName: '',
           userName: '',
-          collageName: '',
+          collegeName: '',
           password: '',
           email: '',
           selfDescription: '',
@@ -37,7 +37,6 @@ export default function useTheme() {
           disLikes: [],
           saved: [],
     })
-
     return (
         <ActionContext.Provider value={{ action , setAction }} >
             {children}

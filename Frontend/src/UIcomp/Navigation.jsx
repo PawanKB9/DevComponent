@@ -33,9 +33,8 @@ const Navbar = ({show}) => {
       selectGetCurrentUserResult(state)?.data
     );
     
-
-    console.log(currentUser);
-    // if(!userData){
+    // console.log(currentUser);
+    // if(!currentUser){
     //   trigger();
     // }
     // const [a,b] =useState(true)
@@ -67,7 +66,7 @@ const Navbar = ({show}) => {
       if (userName) {
         navigate("/profile");
       } else {
-        navigate("/profile");
+        navigate("/login-signup");
       }
     }
     const addPost = () => {

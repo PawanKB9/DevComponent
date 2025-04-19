@@ -24,3 +24,5 @@ export const selectDeleteDislikesResult = userApi.endpoints.deleteDislikes.selec
 export const selectDeleteLikesResult = userApi.endpoints.deleteLikes.select();
 export const selectGetUserPostResult = userApi.endpoints.getUserPost.select();
 export const selectGetOtherUserDataResult = userApi.endpoints.getOtherUserData.select();
+export const selectUploadProfileImageResult = userApi.endpoints.uploadProfileImage.select();
+export const selectGetImageResult = userApi.endpoints.getImage.select();

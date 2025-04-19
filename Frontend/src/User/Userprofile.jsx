@@ -1,40 +1,56 @@
 import React, { useEffect, useState } from "react";
 import { FaPen ,FaCamera ,FaSave } from "react-icons/fa";
-import { selectGetCurrentUserResult , selectGetMyPostsResult } from '../RTK/Selectors.jsx'
+import { selectGetCurrentUserResult , selectGetImageResult, selectGetMyPostsResult , selectUploadProfileImageResult } from '../RTK/Selectors.jsx'
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PostCard } from '../UIcomp/Components.jsx';
 import {useDeleteMyPostMutation, useLazyGetMyPostsQuery} from '../RTK/PostApi.jsx'
-import {useUpdateCurrentUserMutation ,useUploadProfileImageMutation} from '../RTK/UserApi.jsx'
+import {useGetImageQuery, useLazyGetCurrentUserQuery, useLazyGetImageQuery, useUpdateCurrentUserMutation ,useUploadProfileImageMutation} from '../RTK/UserApi.jsx'
 import { userApi } from "../RTK/UserApi.jsx";
 
 
 const UserProfile = () => {
 
-  const userData = useSelector((state) =>
-    selectGetCurrentUserResult(state)?.data
-  ) || null;
-  console.log(userData);
+  const currUserData = useSelector((state) => selectGetCurrentUserResult(state)?.data );
+  const [profileTrigger , {data:profileData}] = useLazyGetCurrentUserQuery(); 
+
+  
+  useEffect(() =>{
+    if( !userData){
+       profileTrigger(); 
+    } 
+  }, [] ); 
+  const userData = currUserData || profileData; 
+  // console.log(userData); 
+
+  
   const userName = userData?.userName
   const fullName = userData?.fullName
-  const collegeName = userData?.collageName
+  const collegeName = userData?.collegeName
   // const profileImg = userData.profileImg
   // const bgImg = userData.bgImg
   const selfDescription = userData?.selfDescription
+  
+  useEffect(() =>{
+    setCollege(collegeName); 
+    setDescription(selfDescription); 
+    setName(fullName); 
+  } , [userData])
+
 
   const [isEditble , setIsEditble] = useState(false);
   const [name ,setName] = useState(fullName)
   const [college ,setCollege] = useState(collegeName)
   const [description ,setDescription] = useState(selfDescription)
-
+  
   const navigate = useNavigate();
   // useEffect(() => {
-  //   if(!userName){
-  //     // navigate('/login-signup')
-  //   }
-  // } ,[navigate])
-// const allPosts = useSelector(selectGetMyPostsResult);
-const allPosts = null;
+    //   if(!userName){
+      //     // navigate('/login-signup')
+      //   }
+      // } ,[navigate])
+      const allPosts = useSelector((state) => selectGetMyPostsResult(state)?.data);
+// const allPosts = null;
 const [trigger ,{data ,isError:hi ,error:hlo}] = useLazyGetMyPostsQuery();
 
 useEffect(() => {
@@ -49,13 +65,14 @@ useEffect(() => {
    const updates = {};
  
    if (name !== userData.fullName) updates.fullName = name;
-   if (college !== userData.collageName) updates.collageName = college;
+   if (college !== userData.collegeName) updates.collegeName = college;
    if (description !== userData.selfDescription) updates.selfDescription = description;
  
    if (isEditble && Object.keys(updates).length > 0) {
      try {
-       await updateCurrentUser(updates).unwrap();
-     } catch (err) {
+        await updateCurrentUser(updates).unwrap();
+     } 
+     catch (err) {
        console.error("Update failed:", err);
      }
    }
@@ -74,8 +91,9 @@ useEffect(() => {
   };
   
   const DeleteOne = async (postId) => {
+    let postIdArr = [postId]
     try {
-      await deleteMyPost([postId]).unwrap();
+      await deleteMyPost(postIdArr).unwrap();
     } catch (err) {
       console.error('Delete one failed:', err);
     }
@@ -84,34 +102,50 @@ useEffect(() => {
   const [bgImg, setBgImg] = useState(userData?.bgImg || null);
   const [profileImg, setProfileImg] = useState(userData?.profileImg || null);
 
-  const [uploadProfileImage] = useUploadProfileImageMutation();
+  const [uploadProfileImage , { }] = useUploadProfileImageMutation();
+
+  // const { data:img } = useGetImageQuery(); 
+  const [ imgTrigger , {data:lazyData }] = useLazyGetImageQuery();
+  const curImgData = useSelector( (state) => selectGetImageResult(state)?.data );
+ 
+  useEffect( () =>{
+    if( ! curImgData ){
+        imgTrigger(); 
+    } 
+  }, [])  
+  const img = curImgData || lazyData;  
+  // console.log(curImgData);
+   
+  useEffect(()=>{ 
+    setProfileImg(img?.profileImg);
+    setBgImg(img?.bgImg);
+  },[img]);
 
   const handleImageChange = async (e, type) => {
     const file = e.target.files[0];
+    // console.log(file); 
     if (!file) return;
   
     // Show preview instantly
     const imageUrl = URL.createObjectURL(file);
-    if (type === "profile") {
-      setProfileImg(imageUrl);
-    } else {
-      setBgImg(imageUrl);
-    }
-  
+      
     // Upload to server
-    const formData = new FormData();
-    formData.append(type === "profile" ? "profileImg" : "bgImg", file);
-  
+    const formData = new FormData(); 
+    const fieldName = type === "profile" ? "profileImg" : "bgImg";
+    
+    formData.append(fieldName, file);
+       
     try {
-      const res = await uploadProfileImage(formData).unwrap();
-      console.log("Uploaded:", res);
-    } catch (err) {
+       await uploadProfileImage(formData).unwrap()
+      // console.log("Uploaded:", res);
+
+  
+    } 
+    catch (err) {
       console.error("Upload failed:", err);
     }
   };
-  
-  
-
+ 
 
   return (
     <div id="linkedInProfile_SPand_ST" className="max-w-[900px] p-2 largePhone:p-4 bg-amber-100">

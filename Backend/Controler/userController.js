@@ -6,25 +6,30 @@ const limit = 10;
 // Register controller
 export const register = async( req , res ) =>{
     try {
-        const {username, fullName, selfDescription ,password ,collageName ,email} = req.body;
-        if(!username || !password || !email || !fullName){
+        const { userData } = req.body;
+        const userName = userData.userName;
+        const fullName = userData.fullName;
+        const selfDescription = userData.selfDescription;
+        const password = userData.password;
+        const collegeName = userData.userName;
+        const email = userData.email;
+        
+        if(!userName || !password || !email || !fullName){
             return res.status(400).send('some information is missing ')
         }
-
         // apply middleware before saving
         // bcrypt , authentication , token generation, etc.
         const hashedPassword = await bcrypt.hash( password , 10); 
 
         const newUser = new users({
-            _id:username,
+            _id:userName,
             fullName,
-            collageName,
+            collegeName,
             password:hashedPassword,
             email,
             selfDescription,
         })
         await newUser.save()
-        console.log(`${newUser}`)
            return res.status(200).send(newUser)
        }  
        catch (err) {
@@ -111,7 +116,6 @@ export const logout = (req , res ) =>{
     }
 }
 
-
 // See profile controller 
 export const seeProfile = async (req ,res) =>{
     
@@ -124,6 +128,8 @@ export const seeProfile = async (req ,res) =>{
         if(!_id){
             return res.status(400).send('Id not found')
         }
+        // console.log("hello Pawan Bhai");
+        
         const User = await users.findById(_id);
         if (!User) {
             return res.status(404).send('User not found');
@@ -135,6 +141,9 @@ export const seeProfile = async (req ,res) =>{
             collegeName:User.collegeName, 
             email:User.email,  
             selfDescription:User.selfDescription,
+            likes:User.likes,
+            disLikes:User.disLikes,
+            saved:User.saved
         }
         return res.status(200).send(newUser);
     } 
@@ -150,31 +159,32 @@ export const updateProfile =  async(req, res) => {
     
     // partial update : update only specified fields
     try {
-        const {_id , fullName , collageName, password, selfDescription, email } = req.body;
+        const _id  = req.id; 
+        const { userData } = req.body;
+         
         if(!_id){
             return res.status(400).send('username not found')
         }
-        const updatedUser = await users.findByIdAndUpdate(
-            _id,
-            { fullName, collageName, password, selfDescription, email },
-            { new: true }
-        );
-        if (!updatedUser) {
-            return res.status(404).send('User not found');
-        }
-        return res.status(200).send(`updated sucessfully ${updatedUser}`)
+
+        // email updating will be done later 
+
+       const result =  await users.findByIdAndUpdate(_id,  userData ,{ new: true });
+    
+        return res.status(200).json(`updated sucessfully`)
 
     } 
     catch (err) {
         console.log(err)
-        return res.status(500).send('Internal server error')
+        return res.status(500).json('Internal server error')
     }
 }
 
 // change password controller
 export const changePassword = async( req , res ) =>{
     try {
-        const { oldPassword ,newPassword , userName} = req.body;
+        const { oldPassword ,newPassword} = req.body;
+        const userName = req.id; 
+
         const User = await users.findById(userName);
         if (!User) {
             return res.status(404).send('User not found');
@@ -187,17 +197,17 @@ export const changePassword = async( req , res ) =>{
         }
         // save new password in incripted form
         const bcryptedPass = await bcrypt.hash( newPassword, 10);
-        users.updateOne({_id : userName} ,{$set: { password: bcryptedPass }}); 
+        await users.updateOne({_id : userName} ,{$set: { password: bcryptedPass }}); 
         
-        const email = User.email;
-        await sendPasswordUpdatedMail(email, userName);
+        // const email = User.email;
+        // await sendPasswordUpdatedMail(email, userName);
 
         // save new password in incripted form 
-        return res.status(200).send('password updated successfully');
+        return res.status(200).json('password updated successfully');
 
     } catch (err) {
         console.log(err)
-        return res.status(500).send('Internal server error')
+        return res.status(500).json('Internal server error')
     }
 }
 
@@ -205,19 +215,110 @@ export const changePassword = async( req , res ) =>{
 export const forgotPassword = async ( req , res ) =>{
     try {
         const { email ,password } = req.body;
+        // console.log(req.body); 
+
         const User = await users.findOne({email});
         if (!User) {
             return res.status(404).send('User not found');
         }
+        
         // save this password in increpted form
-       const bcryptedPass = await bcrypt.hash( password , 10 ); 
-        users.updateOne({_id : User.userName} ,{$set: { password: bcryptedPass }});
+        const bcryptedPass = await bcrypt.hash( password , 10 ); 
+        await users.updateOne({_id : User._id} ,{$set: { password: bcryptedPass }});
+        
+        // console.log(result); 
+        // await sendPasswordUpdatedMail(email, userName);
+        
+        return res.status(200).json('password updated successfully');
 
-        await sendPasswordUpdatedMail(email, userName);
-
-        return res.status(200).send('password updated successfully');
     } catch (err) {
         console.log(err)
-        return res.status(500).send('Internal server error')
+        return res.status(500).json('Internal server error')
     }
 }
+
+// other user profile controller 
+export const otherUserProfile = async (req , res ) =>{
+    try {
+        const { userName } = req.query;
+        if(!userName){
+            return res.status(400).send('Id not found')
+        }
+        const user = await users.findOne(
+            { _id: userName },
+            {
+              _id: 1,
+              fullName: 1,
+              collegeName: 1,
+              selfDescription: 1
+            }
+          );
+          
+          if (!user) {
+            return res.status(404).json('User not found');
+          }
+          
+          const data = {
+            userName: user._id,
+            fullName: user.fullName,
+            collegeName: user.collegeName,
+            selfDescription: user.selfDescription
+          };
+
+        res.status(200).json(data);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json('Internal server error')
+    }
+}
+
+// change image controller 
+export const changeImage = async (req , res ) =>{
+    try {
+        const userName = req.id; 
+        const plainFiles = { ...req.files }; 
+
+        const updates = {};
+        for (const [type, fileArr] of Object.entries(plainFiles)) {
+            if (fileArr.length > 0) {
+              updates[type] = fileArr[0].path;
+            }
+        }
+
+        // const [key, value] = Object.entries(updates)[0];
+ 
+        // Update in DB (you can also get user ID from auth middleware)
+        await users.findByIdAndUpdate(userName, {$set:updates } , { new: true }); 
+    //    console.log(bgImg);
+       
+        
+        res.status(200).json({ message: "uploaded successfully"});
+    }
+    catch (err) {
+    res.status(500).json({ error: 'Upload failed', details: err });
+    }  
+}
+
+// get profile image controller 
+export const getProfileImage = async ( req , res ) =>{
+    try {
+        const userName = req.id; 
+        
+        const currUser = await users.findById({_id : userName });
+        // console.log(userName); 
+        // console.log(currUser);
+        
+        const bgImg = currUser.bgImg; 
+        const profileImg = currUser.profileImg; 
+       
+       return res.status(200).json({bgImg , profileImg}); 
+    } 
+    catch (error) {
+        console.log("internal server error"); 
+    }
+}
+
+
+// fn - 
+// cn - 
+// des -

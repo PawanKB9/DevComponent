@@ -115,7 +115,7 @@ const AboutUs = () => {
           designs, we welcome you to be a part of our growing community.
         </p>
         <div className="mt-6">
-          <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out">
+          <button  className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out">
             Join Us
           </button>
         </div>

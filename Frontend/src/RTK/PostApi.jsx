@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const postApi = createApi({
     reducerPath: "postApi",
+    refetchOnMountOrArgChange: true,
     refetchOnFocus: true, // need listener in store
     refetchOnReconnect: true,  // need listener in store
     baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/pp/devcomp" ,credentials: "include" }),
@@ -16,20 +17,20 @@ export const postApi = createApi({
         //     providesTags: ['Posts'],
         // }),
         getFilterPosts: builder.query({
-            query: ({filter ,code ,page}) => ({
-                url:`/:filter?/:code?`,
-                params:{page ,filter ,code},
+            query: ({filter ,code ,page} ) => ({
+                url:`post/${filter}?/${code}?/${page}?`,
             }),
             providesTags: ['Posts'],
         }),
         createNewPost: builder.mutation({
-            query: ({userName ,postData}) => ({
-                url:`/addpost`,
+            query: ({postData}) => ({
+                url:`/post/addpost`,
                 method:'POST',
                 credentials:'include',
-                body:{userName ,postData},
+                body:{postData},
             }),
             invalidatesTags: ['Posts'],
+            
         }),
         getMyPosts: builder.query({
             query: () => ({
@@ -39,8 +40,8 @@ export const postApi = createApi({
             // providesTags: ['Posts'],
         }),
         deleteMyPost: builder.mutation({
-            query: ({ postIdArr }) => ({
-                url: `/post/deletePost`,
+            query: ( postIdArr ) => ({
+                url: `post/deletepost`,
                 method: 'DELETE',
                 body: { postIdArr },
                 credentials: 'include',
@@ -53,7 +54,8 @@ export const postApi = createApi({
                             const newData = data.filter((curData) => curData.postId !== postIdArr[0]);
                             return newData;
                         }));
-                    } else if (postIdArr.length > 1) { // multiple posts will be deleted
+                    }
+                     else if (postIdArr.length > 1) { // multiple posts will be deleted
                         action = dispatch(postApi.util.updateQueryData('getMyPosts', undefined, () => null));
                     }
                     await queryFulfilled;
@@ -68,88 +70,88 @@ export const postApi = createApi({
                 url: `/post/liked`, // geting all likes post 
                 credentials: "include",
             }),
-            providesTags: ['likedPost'],
+            // providesTags: ['likedPost'],
         }),
         getAllDisLikes: builder.query({
             query: () => ({
                 url: `/post/disliked`,// geting all Dislikes post
                 credentials: "include",
             }),
-            providesTags: ['disLikePost']
+            // providesTags: ['disLikePost']
         }),
         getAllSaved: builder.query({
             query: () => ({
                 url: `/post/saved`, // geting all saved post
                 credentials: "include",
             }),
-            providesTags: ['savedPost'],
+            // providesTags: ['savedPost'],
         }),
         updateLike: builder.mutation({
-            query: ({ userName, apply, postId }) => ({
+            query: ({  apply, postId }) => ({
                 url: `/post/like`,
                 method: 'PATCH',
-                body: { userName, apply, postId },
+                body: { apply, postId },
                 credentials: 'include',
             }),
-            onQueryStarted: async ({ postId, apply }, { dispatch, queryFulfilled }) => {
-                let action;
-                try {
-                    action = dispatch(postApi.util.updateQueryData('getFilterPosts', undefined, (data) => {
-                        const newData = data.map((curPost) => {
-                            if (curPost.postId === postId) {
-                                return {
-                                    ...curPost,
-                                    likes: apply ? curPost.likes + 1 : curPost.likes - 1
-                                };
-                            }
-                            return curPost;
-                        });
-                        return newData;
-                    }));
-                    await queryFulfilled;
-                } catch (err) {
-                    if (action) action.undo();
-                }
-            },
-            invalidatesTags: ['likedPost'],
+            // onQueryStarted: async ({ postId, apply }, { dispatch, queryFulfilled }) => {
+            //     let action;
+            //     try {
+            //         action = dispatch(postApi.util.updateQueryData('getFilterPosts', undefined, (data) => {
+            //             const newData = data.map((curPost) => {
+            //                 if (curPost.postId === postId) {
+            //                     return {
+            //                         ...curPost,
+            //                         likes: apply ? curPost.likes + 1 : curPost.likes - 1
+            //                     };
+            //                 }
+            //                 return curPost;
+            //             });
+            //             return newData;
+            //         }));
+            //         await queryFulfilled;
+            //     } catch (err) {
+            //         if (action) action.undo();
+            //     }
+            // },
+            // invalidatesTags: ['likedPost'],
         }),
         updateDislike: builder.mutation({
-            query: ({userName ,apply ,postId}) => ({
+            query: ({ apply ,postId}) => ({
                 url:`/post/disLike`,
                 method:'PATCH',
-                body: { userName ,apply ,postId},
+                body: { apply ,postId},
                 credentials:'include',
             }),
-            onQueryStarted:async ({apply ,postId} , {dispatch ,queryFulfilled}) => {
-                let action;
-                try {
-                    action = dispatch(postApi.util.updateQueryData('getFilterPosts',undefined, (data) => {
-                        const newData = data.map((curPost) => {
-                            if(curPost.postId === postId){
-                                return{
-                                    ...curPost,
-                                    disLikes: apply ? curPost.disLikes + 1 : curPost.disLikes - 1
-                                }
-                            }
-                            return curPost;
-                        })
-                        return newData;
-                    }))
-                    await queryFulfilled;
-                } catch (err) {
-                    if(action) action.undo();
-                }
-            },
-            invalidatesTags: ['disLikePost'],
+            // onQueryStarted:async ({apply ,postId} , {dispatch ,queryFulfilled}) => {
+            //     let action;
+            //     try {
+            //         action = dispatch(postApi.util.updateQueryData('getFilterPosts',undefined, (data) => {
+            //             const newData = data.map((curPost) => {
+            //                 if(curPost.postId === postId){
+            //                     return{
+            //                         ...curPost,
+            //                         disLikes: apply ? curPost.disLikes + 1 : curPost.disLikes - 1
+            //                     }
+            //                 }
+            //                 return curPost;
+            //             })
+            //             return newData;
+            //         }))
+            //         await queryFulfilled;
+            //     } catch (err) {
+            //         if(action) action.undo();
+            //     }
+            // },
+            // invalidatesTags: ['disLikePost'],
         }),
         updateSaved: builder.mutation({
-            query: ({userName ,apply ,postId}) => ({
+            query: ({ apply ,postId}) => ({
                 url:`/post/save`,
                 method:'PATCH',
-                body: { userName ,apply ,postId},
+                body: { apply ,postId},
                 credentials:'include',
             }),
-            invalidatesTags: ['savedPost'],
+            // invalidatesTags: ['savedPost'],
             // optimistic approach not needed : no save counter is there;
         }),
     }),
@@ -163,6 +165,7 @@ export const {
     useLazyGetAllLikesQuery,
     useLazyGetAllSavedQuery,
     useGetFilterPostsQuery,
+    useLazyGetFilterPostsQuery,
     useLazyGetMyPostsQuery,
     useUpdateDislikeMutation,
     useUpdateLikeMutation,

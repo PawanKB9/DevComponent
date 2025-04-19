@@ -6,12 +6,21 @@ import { postApi } from './PostApi.jsx';
 export const userApi = postApi.injectEndpoints({
     reducerPath: 'userApi',
     endpoints: (builder) => ({
-        uploadProfileImage: builder.mutation({
-            query: (formData) => ({
-              url: '/upload-profile',
-              method: 'POST',
-              body: formData,
+        getImage: builder.query({
+            query: () => ({
+                url:`/getprofileimage`,
+                credentials:'include',
             }),
+            providesTags:["prfileImg"],
+        }),
+        uploadProfileImage: builder.mutation({
+            query: ( formData ) => ({
+              url: '/upload-profile',
+              method: 'PATCH',
+              body:formData,
+              credentials:'include',
+            }),
+            invalidatesTags:["prfileImg"],
           }),          
         ResetPassword: builder.mutation({
             query: ({oldPassword ,newPassword}) => ({
@@ -45,7 +54,7 @@ export const userApi = postApi.injectEndpoints({
             invalidatesTags: ['curUser'],
         }),
         updateCurrentUser: builder.mutation({
-            query: ({userData}) => ({
+            query: (userData) => ({
                 url:`/profile`,
                 method:'PATCH',
                 credentials:'include',
@@ -74,84 +83,87 @@ export const userApi = postApi.injectEndpoints({
             providesTags: ['curUser'],
         }),
         deleteSaved: builder.mutation({
-            query: ({userName,savedArr}) => ({
-                url:`/allSaved`,
+            query: (savedArr) => ({
+                url:`/post/allsaved`,
                 method:"DELETE",
                 credentials:'include',
-                body: {userName , savedArr},
+                body: { savedArr},
             }),
-            onQueryStarted: async ({savedArr} ,{dispatch ,queryFulfilled}) => {
-                let action;
-                try {
-                    action = dispatch(postApi.util.updateQueryData('getAllSaved' ,undefined ,(data) => {
-                        const newData = data.filter((curData) => !savedArr.includes(curData.postId))
-                        return newData;
-                    }))
-                    await queryFulfilled;
-                } catch (err) {
-                    if(action) action.undo();
-                }
-            },
-            invalidatesTags: ['savedPost'],
+            // onQueryStarted: async ({savedArr} ,{dispatch ,queryFulfilled}) => {
+            //     let action;
+            //     try {
+            //         action = dispatch(postApi.util.updateQueryData('getAllSaved' ,undefined ,(data) => {
+            //             const newData = data.filter((curData) => !savedArr.includes(curData.postId))
+            //             return newData;
+            //         }))
+            //         await queryFulfilled;
+            //     } catch (err) {
+            //         if(action) action.undo();
+            //     }
+            // },
+            // invalidatesTags: ['savedPost'],
         }),
         deleteDislikes: builder.mutation({
-            query:({userName ,disLikeArr}) => ({
-                url:`/allDisLikes`,
+            query:(disLikeArr) => ({
+                url:`/post/alldislikes`,
                 credentials:'include',
-                body:{userName ,disLikeArr},
+                body:{disLikeArr},
                 method:'DELETE',
             }),
-            onQueryStarted: async ({disLikeArr},{dispatch ,queryFulfilled}) => {
-                let action;
-                try {
-                    action = dispatch(postApi.util.updateQueryData('getAllDisLikes' ,undefined ,(data) => {
-                        const newData = data.filter((curData) => !disLikeArr.includes(curData.postId))
-                        return newData;
-                    }))
-                    await queryFulfilled;
-                } catch (err) {
-                    if(action) action.undo();
-                }
-            },
-            invalidatesTags: ['disLikePost'],
+            // onQueryStarted: async ({disLikeArr},{dispatch ,queryFulfilled}) => {
+            //     let action;
+            //     try {
+            //         action = dispatch(postApi.util.updateQueryData('getAllDisLikes' ,undefined ,(data) => {
+            //             const newData = data.filter((curData) => !disLikeArr.includes(curData.postId))
+            //             return newData;
+            //         }))
+            //         await queryFulfilled;
+            //     } catch (err) {
+            //         if(action) action.undo();
+            //     }
+            // },
+            // invalidatesTags: ['disLikePost'],
         }),
         deleteLikes: builder.mutation({
-            query: ({ userName, likeArr }) => ({
-                url: `/allLikes`,
+            query: ( likeArr ) => ({
+                url: `/post/alllikes`,
                 method: 'DELETE',
                 credentials: 'include',
-                body: { userName, likeArr },
+                body: { likeArr },
             }),
-            onQueryStarted: async ({ likeArr }, { dispatch, queryFulfilled }) => {
-                let action;
-                try {
-                    action = dispatch(postApi.util.updateQueryData('getAllLikes', undefined, (data) => {
-                        // Filter out the posts that have been present in likeArr
-                        const newData = data.filter((curData) => !likeArr.includes(curData.postId));
-                        return newData;
-                    }));
-                    await queryFulfilled;
-                } catch (err) {
-                    if (action) action.undo();
-                }
-            },
-            invalidatesTags: ['likedPost'],
+            // onQueryStarted: async ({ likeArr }, { dispatch, queryFulfilled }) => {
+            //     let action;
+            //     try {
+            //         action = dispatch(postApi.util.updateQueryData('getAllLikes', undefined, (data) => {
+            //             // Filter out the posts that have been present in likeArr
+            //             const newData = data.filter((curData) => !likeArr.includes(curData.postId));
+            //             return newData;
+            //         }));
+            //         await queryFulfilled;
+            //     } catch (err) {
+            //         if (action) action.undo();
+            //     }
+            // },
+            // invalidatesTags: ['likedPost'],
         }),
         getUserPost: builder.query({
-            query: ({userName}) => ({
-                url: '/myPost',  // post of any user by userName
-                method: 'GET',
-                params: { userName },
+            query: (userName) => ({
+              url: `/post/1/3/4/otheruserpost`, // no userName in path
+              method: 'GET',
+              params: { userName },         // this becomes ?userName=abc
             }),
-        }),
-        getOtherUserData: builder.query({
-            query: (userName) => ({ // for other user data
-                url: '/userData',  // FullName, CollegeName, selfDescribe, userName
-                method: 'GET',
-                params: { userName },
+            providesTags: ['userPost'],
+          }),
+          
+          getOtherUserData: builder.query({
+            query: (userName) => ({
+              url: '/1/userdata/',
+              method: 'GET',
+              params: { userName },
             }),
-        })
-    }),
+            providesTags: ['otherUserData'],
+          }),
+    })          
     // overrideExisting: false, // Optional: add this if you want to override existing endpoints
 });
 
@@ -170,6 +182,8 @@ export const {
     useGetUserPostQuery,
     useGetOtherUserDataQuery,
     usePrefetch,
+    useGetImageQuery,
+    useLazyGetImageQuery,
 } = userApi;
 
 // const [trigger, { data, isFetching }] = useLazyGetUserDetailsQuery(); // or your endpoint name

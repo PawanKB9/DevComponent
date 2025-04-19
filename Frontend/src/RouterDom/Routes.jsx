@@ -13,11 +13,14 @@ import OtherUserProfile from '../User/OtherUserProfile.jsx'
 // import { ChangePassword } from '../UIcomp/UserForm.jsx'
 import { useGetCurrentUserQuery } from '../RTK/UserApi.jsx';
 import PostView from '../UIcomp/PostView.jsx'
-import { ChangePassword } from '../UIcomp/UserForm.jsx';
+import { ChangePassword, ForgotPassword } from '../UIcomp/UserForm.jsx';
+import { selectGetCurrentUserResult } from '../RTK/Selectors.jsx';
 
 const AllRoute = () => {
 
-    const { data, isLoading, isError, error } = useGetCurrentUserQuery();
+    const data = useSelector((state) =>
+      selectGetCurrentUserResult(state)?.data
+    );
     const userName = data?.userName || null;
     
   // const getUserPostResult = useSelector(selectGetUserPostResult({ userName }));
@@ -43,12 +46,9 @@ const AllRoute = () => {
       //     Boolean(state.postApi.queries[`${endpointName}(${JSON.stringify(args)})`]?.data)
       //   );
       // };      
-
     let ind = 0;
-    const isLoggedIn = true;
-
-    if(isLoggedIn){
-        ind = 3;
+    if(userName){
+        ind = 2;
     }
     return (
         <Router>
@@ -68,6 +68,7 @@ const AllRoute = () => {
                 <Route path='/AboutUs' element={<AboutUs/>} />
                 <Route path='/other-user' element={<OtherUserProfile />} />
                 <Route path='/change-password' element={<ChangePassword />} />
+                <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/post-view' element={ <PostView/> } />
             </Routes>
         </Router>

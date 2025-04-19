@@ -580,66 +580,66 @@
 
 // // deleting all likes from users collection and decrementing Count from posts collection 
 // app.delete('/allLikes', async (req, res) => {
-//     try {
-//         const { userName, likeArr } = req.body;
+    // try {
+    //     const { userName, likeArr } = req.body;
 
-//         if (!likeArr || likeArr.length === 0) {
-//             return res.status(400).send('likeArr is required');
-//         }
+    //     if (!likeArr || likeArr.length === 0) {
+    //         return res.status(400).send('likeArr is required');
+    //     }
 
-//         // Remove all post IDs from the likes array in the users collection
-//         if (likeArr.length > 1) {
-//             await users.updateOne(
-//                 { _id: userName },
-//                 { $set: { likes: [] } }
-//             );
-//         } else if (likeArr.length === 1) { //remove id from users collection
-//             await users.updateOne(
-//                 { _id: userName },
-//                 { $pull: { likes: likeArr[0] } }
-//             );
-//         }
-//         // Decrement the likes count in the posts collection for each post ID
-//         await posts.updateMany(
-//             { _id: { $in: likeArr } },
-//             { $inc: { likes: -1 } }
-//         );
+    //     // Remove all post IDs from the likes array in the users collection
+    //     if (likeArr.length > 1) {
+    //         await users.updateOne(
+    //             { _id: userName },
+    //             { $set: { likes: [] } }
+    //         );
+    //     } else if (likeArr.length === 1) { //remove id from users collection
+    //         await users.updateOne(
+    //             { _id: userName },
+    //             { $pull: { likes: likeArr[0] } }
+    //         );
+    //     }
+    //     // Decrement the likes count in the posts collection for each post ID
+    //     await posts.updateMany(
+    //         { _id: { $in: likeArr } },
+    //         { $inc: { likes: -1 } }
+    //     );
 
-//         res.status(200).send('Likes removed and counts updated');
-//     } catch (err) {
-//         res.status(500).send('Internal server error');
-//     }
+    //     res.status(200).send('Likes removed and counts updated');
+    // } catch (err) {
+    //     res.status(500).send('Internal server error');
+    // }
 // }); //done                                                                                                                                                                                     
 
 // // deleting all disLikes from users collection and decrementing Count from posts collection
 // app.delete('/allDisLikes' , async (req ,res) => {
-//     try {
-//         const { userName, disLikeArr } = req.body;
-//         if (!disLikeArr || disLikeArr.length === 0) {
-//             return res.status(400).send('disLikeArr is required');
-//         }
+    // try {
+    //     const { userName, disLikeArr } = req.body;
+    //     if (!disLikeArr || disLikeArr.length === 0) {
+    //         return res.status(400).send('disLikeArr is required');
+    //     }
 
-//         // Remove all post IDs from the disLikes array in the users collection
-//         if (disLikeArr.length > 1) {
-//             await users.updateOne(
-//                 { _id: userName },
-//                 { $set: { disLikes: [] } }
-//             );
-//         } else if (disLikeArr.length === 1) {
-//             await users.updateOne(
-//                 { _id: userName },
-//                 { $pull: { disLikes: disLikeArr[0] } }
-//             );
-//         }
-//         // Decrement the disLikes count in the posts collection for each post ID
-//         await posts.updateMany(
-//             { _id: { $in: disLikeArr } },
-//             { $inc: { disLikes: -1 } }
-//         );
-//         res.status(200).send('disLikes removed and counts updated');
-//     } catch (err) {
-//         res.status(500).send('Internal server error');
-//     }
+    //     // Remove all post IDs from the disLikes array in the users collection
+    //     if (disLikeArr.length > 1) {
+    //         await users.updateOne(
+    //             { _id: userName },
+    //             { $set: { disLikes: [] } }
+    //         );
+    //     } else if (disLikeArr.length === 1) {
+    //         await users.updateOne(
+    //             { _id: userName },
+    //             { $pull: { disLikes: disLikeArr[0] } }
+    //         );
+    //     }
+    //     // Decrement the disLikes count in the posts collection for each post ID
+    //     await posts.updateMany(
+    //         { _id: { $in: disLikeArr } },
+    //         { $inc: { disLikes: -1 } }
+    //     );
+    //     res.status(200).send('disLikes removed and counts updated');
+    // } catch (err) {
+    //     res.status(500).send('Internal server error');
+    // }
     
 // }) // done
 

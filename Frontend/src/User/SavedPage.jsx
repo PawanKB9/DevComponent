@@ -1,8 +1,8 @@
 // import axios from "axios"
-import React , { useState } from "react"
+import React , { useEffect, useState } from "react"
 import { FaTrashAlt } from "react-icons/fa"
 import { LikeComponent1 , LikeComponent2 , SavedCard } from '../UIcomp/Components.jsx'
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import {selectGetAllSavedResult ,selectGetCurrentUserResult} from '../RTK/Selectors.jsx';
 import {useDeleteSavedMutation} from '../RTK/UserApi.jsx';
@@ -12,8 +12,8 @@ import {useLazyGetAllSavedQuery} from '../RTK/PostApi.jsx';
 
 const Saved = () => {
     
-    const navigate = useNavigate()
-    const cachedSaved = useSelector(selectGetAllSavedResult);
+    
+    const cachedSaved = useSelector( (state) => selectGetAllSavedResult(state)?.data);
     const [trigger, { data: lazyData, isLoading: lazyLoading, error: lazyError }] = useLazyGetAllSavedQuery();
     useEffect(() => {
         if (!cachedSaved) {
@@ -21,13 +21,9 @@ const Saved = () => {
         }
       }, [cachedSaved, trigger]);
       
-    const userData = useSelector(selectGetCurrentUserResult);
+    const userData = useSelector( (state) => selectGetCurrentUserResult(state)?.data);
     const userName = userData?.userName || null;
-    useEffect(() => {
-        if (!userName) {
-          navigate('/login-signup');
-        }
-      }, [userName, navigate]);
+    
     const saved = cachedSaved || lazyData;
     
     const [deleteSaved, { isError, error }] = useDeleteSavedMutation();
@@ -35,17 +31,17 @@ const Saved = () => {
     const DeleteAll = async () => {
         const savedArr = saved.map((post) => post.postId)
         try {
-            await deleteSaved({userName, savedArr}).unwrap();
+            await deleteSaved( savedArr).unwrap();
         } catch (err) {
-            
+            console.log(err);
         }
     }
     const DeleteOne = async (postId) => {
         let savedArr = [postId];
         try {
-            await deleteSaved({userName,savedArr}).unwrap();
+            await deleteSaved(savedArr).unwrap();
         } catch (err) {
-            
+            console.log(err);            
         }
     }
 
@@ -60,7 +56,7 @@ const Saved = () => {
             </div>
 
             <div className=" overflow-hidden flex flex-col gap-4">
-            {saved.map(({ title, userName, postId ,description }) => (
+            {saved?.map(({ title, userName, postId ,description }) => (
             <div key={postId} className={`flex justify-between gap-x-2 p-1`}>
                 <SavedCard title={title} description={description} userName={userName} postId={postId} />
                 <button onClick={() => DeleteOne(postId)} className="text-xl mx-4 text-red-500">

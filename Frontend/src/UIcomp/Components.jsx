@@ -1,4 +1,4 @@
-import { useState  } from "react";
+import { useEffect, useState  } from "react";
 import { FaThumbsUp, FaThumbsDown, FaSave, FaTrashAlt} from "react-icons/fa";
 import THEMES from "./Theme.jsx";
 import useTheme from "./Context.jsx"
@@ -8,9 +8,10 @@ import { useDispatch ,useSelector} from "react-redux"
 // import { dislikePost, likePost } from "../RTK/PostSlice.jsx";
 import { useNavigate } from "react-router-dom";
 import { useUpdateLikeMutation ,useUpdateSavedMutation ,useUpdateDislikeMutation } from '../RTK/PostApi.jsx'
-import {selectGetAllLikesResult ,selectGetAllDisLikesResult ,selectGetAllSavedResult ,selectGetMyPostsResult} from '../RTK/Selectors.jsx';
+import {selectGetAllLikesResult ,selectGetAllDisLikesResult ,selectGetAllSavedResult ,selectGetMyPostsResult, selectGetCurrentUserResult} from '../RTK/Selectors.jsx';
 // import {UserApi} from '../RTK/UserApi.jsx';
 import CodeEditor from "./CodeEditor.jsx";
+import { userApi } from "../RTK/UserApi.jsx";
 
 // const API_URL = "http://localhost:8000";
 
@@ -18,10 +19,10 @@ const LikeCard = ({ title, description ,postId ,userName}) => {
 
   const { theme } = useTheme();
   const shortDescription =
-  description.length > 25 ? description.slice(0, 25) + "..." : description;
+  description?.length > 25 ? description.slice(0, 25) + "..." : description;
 
   const navigate = useNavigate()
-  const cachedLikes = useSelector(selectGetAllLikesResult);
+  const cachedLikes = useSelector((state) => selectGetAllLikesResult(state)?.data);
   const gotoPost = () => {
     const post = cachedLikes.find(p => p.postId === postId);
     if (post) {
@@ -54,7 +55,7 @@ const DisLikeCard = ({ title, description ,postId ,userName}) => {
   description.length > 25 ? description.slice(0, 25) + "..." : description;
 
   const navigate = useNavigate()
-  const cachedDisLikes = useSelector(selectGetAllDisLikesResult);
+  const cachedDisLikes = useSelector((state) => selectGetAllDisLikesResult(state)?.data);
 
   const gotoPost = () => {
     const post = cachedDisLikes.find(p => p.postId === postId);
@@ -88,7 +89,7 @@ const SavedCard = ({ title, description ,postId ,userName}) => {
   description.length > 25 ? description.slice(0, 25) + "..." : description;
 
   const navigate = useNavigate()
-  const cachedSaved = useSelector(selectGetAllSavedResult);
+  const cachedSaved = useSelector((state) => selectGetAllSavedResult(state)?.data);
   const gotoPost = () => {
     const post = cachedSaved.find(p => p.postId === postId);
     if (post) {
@@ -121,7 +122,7 @@ const PostCard = ({ title, description ,postId ,userName}) => {
     description.length > 15 ? description.slice(0, 15) + "..." : description;
 
   const navigate = useNavigate()
-  const myPosts = useSelector(selectGetMyPostsResult);
+  const myPosts = useSelector( (state) => selectGetMyPostsResult(state)?.data);
   const gotoPost = () => {
     const post = myPosts.find(p => p.postId === postId);
     if (post) {
@@ -274,6 +275,8 @@ const LikeComponent2 = ({title,userName,postId,compType}) => {
 
 const CardComponent = ({ postId=``, userName=``, html=`<h1>hello</h1>`, css=``, js=``, react=``, title=``, description=``, likes=`` }) => {
 
+
+
   // const [fullView ,setFullView] = useState(false)
   const [applyLike, setLikes] = useState(false);
   const [applyDisLikes, setDisLikes] = useState(false);
@@ -286,22 +289,48 @@ const CardComponent = ({ postId=``, userName=``, html=`<h1>hello</h1>`, css=``, 
   let [reactCode ,setReact] = useState(react);
 
   const words = description.split(" ");
-  const shortDescription = words.slice(0, 10).join("") + (words.length > 7 ? "..." : "");
+  const shortDescription = words.slice(0, 10).join(" ") + (words.length > 7 ? "..." : "");
 
   const [updateLike ,{}] = useUpdateLikeMutation();
   const [updateDislike ,{}] = useUpdateDislikeMutation();
   const [updateSaved ,{}] = useUpdateSavedMutation();
+  const navigate = useNavigate(); 
+
+  const currentUser = useSelector((state) =>
+    selectGetCurrentUserResult(state)?.data
+);
+
+useEffect(() => {
+  if (currentUser) {
+    // Set initial state based on currentUser
+    setLikes(currentUser?.likes?.includes(postId));
+    setDisLikes(currentUser?.disLikes?.includes(postId));
+    setSaved(currentUser?.saved?.includes(postId));
+  }
+}, [currentUser, postId]);
+  // if (currentUser?.likes?.includes(postId)) {
+  //   setLikes(true);
+  // }
+  
+
+  // if (currentUser?.disLikes?.includes(postId)) {
+  //   setDisLikes(true);
+  // } 
+
+  // if (currentUser?.saved?.includes(postId)) {
+  //   setSaved(true);
+  // } 
 
   const HandleLike = async () => {
     let apply = !applyLike;
     setLikes(apply); 
     try {
-      await updateLike({ userName, postId, apply}).unwrap();
+      await updateLike({ postId, apply}).unwrap();
   
       if (applyDisLikes) {
         apply = false;
         setDisLikes(false);
-        await updateDislike({ userName, postId, apply }).unwrap();
+        await updateDislike({ postId, apply }).unwrap();
       }
     } catch (err) {
       // handle error
@@ -400,7 +429,10 @@ const CardComponent = ({ postId=``, userName=``, html=`<h1>hello</h1>`, css=``, 
   const dispatch = useDispatch();
 
   const VisitProfile = () => {
-    dispatch(UserApi.util.invalidateTags([{ type: 'UserPost' }, { type: 'OtherUserData' }]));
+    dispatch(userApi.util.invalidateTags([
+      { type: 'userPost' },
+     { type: 'otherUserData'},
+    ]));
     navigate('/other-user', { state: { userName } });
   }
 

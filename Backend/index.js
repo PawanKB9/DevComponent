@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from 'dotenv';
+dotenv.config({});
 import connectDB from "./DataBase/db.js";
 import cookieParser from "cookie-parser";
-dotenv.config({});
 import userRoute from "./FormRoutes/userRoute.js";
 import postRoute from "./FormRoutes/postRoute.js"
 import cors from "cors"

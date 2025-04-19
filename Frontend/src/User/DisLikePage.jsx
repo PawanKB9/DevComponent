@@ -1,5 +1,5 @@
 // import axios from "axios"
-import React , { useState } from "react"
+import React , { useEffect, useState } from "react"
 import { FaTrashAlt } from "react-icons/fa"
 import { LikeComponent1 , LikeComponent2 ,DisLikeCard } from '../UIcomp/Components.jsx'
 import { useDispatch ,useSelector } from "react-redux"
@@ -11,8 +11,8 @@ import { useDeleteDislikesMutation } from '../RTK/UserApi.jsx'
 // const API_URL = "http://localhost:8000";
 
 const DisLikes = () => {
-    const navigate = useNavigate()
-    const cachedDisLikes = useSelector(selectGetAllDisLikesResult);
+
+    const cachedDisLikes = useSelector( (state) => selectGetAllDisLikesResult(state)?.data);
     const [trigger, { data: lazyData, isLoading: lazyLoading, error: lazyError }] = useLazyGetAllDisLikesQuery();
     useEffect(() => {
         if (!cachedDisLikes) {
@@ -20,13 +20,9 @@ const DisLikes = () => {
         }
       }, [cachedDisLikes, trigger]);
       
-    const userData = useSelector(selectGetCurrentUserResult);
+    const userData = useSelector((state) => selectGetCurrentUserResult(state)?.data);
     const userName = userData?.userName || null;
-    useEffect(() => {
-        if (!userName) {
-          navigate('/login-signup');
-        }
-      }, [userName, navigate]);
+   
     const disLikes = cachedDisLikes || lazyData;
 
     const [deleteDislikes, { isError, error }] = useDeleteDislikesMutation();
@@ -34,7 +30,7 @@ const DisLikes = () => {
     const DeleteAll = async () => {
         const disLikeArr = disLikes.map((post) => post.postId);
         try {
-            await deleteDislikes({userName, disLikeArr}).unwrap();
+            await deleteDislikes( disLikeArr).unwrap();
             // const response = await axios.delete(`${API_URL}/allDisLikes` , {
             // data: { userName, disLikeArr },
             // withCredentials: true } )
@@ -42,13 +38,13 @@ const DisLikes = () => {
             //     dispatch(addField({ disLikes: [] })); 
             // }
         } catch (err) {
-            
+           console.log(err);  
         }
     }
     const DeleteOne = async (postId) => {
         let disLikeArr = [postId];
         try {
-            await deleteDislikes({userName, disLikeArr}).unwrap();
+            await deleteDislikes( disLikeArr).unwrap();
             // const response = await axios.delete(`${API_URL}/allDisLikes` , {
             // data: { userName, disLikeArr },
             // withCredentials: true } )
@@ -56,7 +52,7 @@ const DisLikes = () => {
             //     dispatch(addField({ disLikes: [] })); 
             // }
         } catch (err) {
-            
+            console.log(err);            
         }
     }
 
@@ -71,7 +67,7 @@ const DisLikes = () => {
             </div>
 
             <div className=" overflow-hidden flex flex-col gap-4">
-            {disLikes.map(({ title, userName, postId ,description }) => (
+            {disLikes?.map(({ title, userName, postId ,description }) => (
             <div key={postId} className={`flex justify-between gap-x-2 p-1`}>
                 <DisLikeCard title={title} description={description} userName={userName} postId={postId} />
                 <button onClick={() => DeleteOne(postId)} className="text-xl mx-4 text-red-500">
