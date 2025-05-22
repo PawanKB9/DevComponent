@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { users } from '../DataBase/Schema.js';
 import { posts } from '../DataBase/Schema.js'
 
-const limit = 10;
+const limit = 7;
 // add post controller 
 export const addPost =  async(req ,res) => {
     try {
@@ -324,48 +324,98 @@ export const savePost = async (req ,res) => {
     }
 }
 // get all -> filter post 
-export const filterPost = async (req, res) => {
-    try {
-        const filter = req.params.filter || "all";
-        const code = req.params.code ? parseInt(req.params.code) : undefined;
-        const page = parseInt(req.query.page) || 1;
+// export const filterPost = async (req, res) => {
+//     try {
+//         const filter = req.params.filter || "all";
+//         const code = req.params.code ? parseInt(req.params.code) : undefined;
+//         const page = parseInt(req.query.page) || 1;
       
         
-        // const limit = parseInt(req.query.limit) || 2; // Ensure limit is defined
-        const skip = (page - 1) * limit;
-        console.log(page);
+//         // const limit = parseInt(req.query.limit) || 2; // Ensure limit is defined
+//         const skip = (page - 1) * limit;
+//         console.log(page);
         
+//         let matchStage = {};
+//         if (filter !== 'all') {
+//             matchStage.title = filter;
+//         }
+//         if (code !== undefined) {
+//             matchStage.codeType = code;
+//         } 
+//         const result = await posts.aggregate([
+//             {$match : matchStage},
+//             { $sort: { likes: -1 } },
+//             { $project: {
+//                 _id: 0,
+//                 postId: "$_id",
+//                 description: "$description",
+//                 title: "$title",
+//                 userName: "$user",
+//                 codeType: "$codeType",
+//                 likes: "$likes",
+//                 html: { $ifNull: ["$html", ""] },
+//                 css: { $ifNull: ["$css", ""] },
+//                 js: { $ifNull: ["$js", ""] },
+//                 react: { $ifNull: ["$react", ""] },
+//             }},
+//             { $skip: skip },
+//             { $limit: limit }
+//         ])
+        
+//         res.status(200).send(result);
+//     } catch (err) {
+//         console.log(err); // Uncomment this line to log the error
+//         res.status(500).send('Internal server error');
+//     }
+// };
+export const filterPost = async (req, res) => {
+    try {
+        const filter = req.query.filter || "all";
+        const code = req.query.code ? parseInt(req.query.code) : undefined;
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+
+        console.log(`Page: ${page}, Code: ${code}, Filter: ${filter}`);
+        const skip = (page - 1) * limit; // Calculate skip value
+
+
+        // Build match stage based on filter and code
         let matchStage = {};
         if (filter !== 'all') {
             matchStage.title = filter;
         }
-        if (code !== undefined) {
+        if (code !== undefined && code > 0 && code < 4) {
             matchStage.codeType = code;
-        } 
+        }
+
+        // Aggregate pipeline for filtering and pagination
         const result = await posts.aggregate([
-            {$match : matchStage},
-            { $sort: { likes: -1 } },
-            { $project: {
-                _id: 0,
-                postId: "$_id",
-                description: "$description",
-                title: "$title",
-                userName: "$user",
-                codeType: "$codeType",
-                likes: "$likes",
-                html: { $ifNull: ["$html", ""] },
-                css: { $ifNull: ["$css", ""] },
-                js: { $ifNull: ["$js", ""] },
-                react: { $ifNull: ["$react", ""] },
-            }},
-            { $skip: skip },
-            { $limit: limit }
-        ])
-        
-        res.status(200).send(result);
+            { $match: matchStage }, // Match stage based on filter and code
+            { $sort: { likes: -1 } }, // Sort by likes in descending order
+            {
+                $project: {
+                    _id: 0,
+                    postId: "$_id",
+                    description: "$description",
+                    title: "$title",
+                    userName: "$user",
+                    codeType: "$codeType",
+                    likes: "$likes",
+                    html: { $ifNull: ["$html", ""] },
+                    css: { $ifNull: ["$css", ""] },
+                    js: { $ifNull: ["$js", ""] },
+                    react: { $ifNull: ["$react", ""] },
+                },
+            },
+            { $skip: skip }, // Skip based on page and limit
+            { $limit: limit }, // Limit number of results
+        ]);
+
+        // console.log(result);
+
+        res.status(200).send(result); // Send the resulting posts
     } catch (err) {
-        console.log(err); // Uncomment this line to log the error
-        res.status(500).send('Internal server error');
+        console.error(err); // Log the error for debugging
+        res.status(500).send("Internal server error"); // Send an error response
     }
 };
 

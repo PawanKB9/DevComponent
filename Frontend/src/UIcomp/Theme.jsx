@@ -66,7 +66,7 @@ const THEMES = {
     input1: "border border-green-500 bg-gray-800 text-green-300",
     input2: "border border-green-400 bg-gray-700 text-green-300",
     labels: "text-green-400",
-    page1: "bg-red-900 text-green-700",
+    page1: "bg-gray-900 text-green-700",
     page2: "bg-gray-800 text-green-600",
     outerContainer: "bg-gray-900",
     shadows1: "bg-gray-100 shadow-lg shadow-zinc-100 hover:shadow-green-500",

@@ -5,7 +5,7 @@ import { postApi } from "./PostApi.jsx";
 export const selectGetAllDisLikesResult = postApi.endpoints.getAllDisLikes.select();
 export const selectGetAllLikesResult = postApi.endpoints.getAllLikes.select();
 export const selectGetAllSavedResult = postApi.endpoints.getAllSaved.select();
-export const selectGetFilterPostsResult = postApi.endpoints.getFilterPosts.select();
+// export const selectGetFilterPostsResult = postApi.endpoints.getFilterPosts.select();
 export const selectGetMyPostsResult = postApi.endpoints.getMyPosts.select();
 
 export const selectCreateNewPostResult = postApi.endpoints.createNewPost.select();

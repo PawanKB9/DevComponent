@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const postApi = createApi({
     reducerPath: "postApi",
-    refetchOnMountOrArgChange: true,
     refetchOnFocus: true, // need listener in store
     refetchOnReconnect: true,  // need listener in store
     baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/pp/devcomp" ,credentials: "include" }),
@@ -16,12 +15,12 @@ export const postApi = createApi({
         //     }),
         //     providesTags: ['Posts'],
         // }),
-        getFilterPosts: builder.query({
-            query: ({filter ,code ,page} ) => ({
-                url:`post/${filter}?/${code}?/${page}?`,
-            }),
-            providesTags: ['Posts'],
-        }),
+        // getFilterPosts: builder.query({
+        //     query: ({filter ,code ,page} ) => ({
+        //         url: `post/allfilter?filter=${filter}&page=${page}&code=${code}`,
+        //     }),
+        //     providesTags: ['Posts'],
+        // }),
         createNewPost: builder.mutation({
             query: ({postData}) => ({
                 url:`/post/addpost`,
@@ -173,7 +172,14 @@ export const {
     usePrefetch,
 } = postApi;
 
-
+const fn = () => {
+    const code = null;
+    const filter = "";
+    const page = 1;
+    const {data:initialData} = useGetFilterPostsQuery({filter , code , page})
+    return initialData;
+}
+export default fn;
 // const fn = () => {
 //     const [trigger, { data: lazyData, isLoading: isLazyLoading, error: lazyError, isError }] = useLazyGetAllDisLikesQuery();
 //     const { data, isLoading, error } = useGetAllDisLikesQuery();
